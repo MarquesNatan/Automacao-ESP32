@@ -2,13 +2,11 @@
 #ifndef WIFI_H
 #define WIFI_H
 /******************************************************************************/
-typedef struct 
-{
-    char SSID[50];
-    char PASS[10];
-}wifi_network_t;
+#define WIFI_SSID           "Metal Pleno 2.4G"
+#define WIFI_PASS           "08969712"
+#define WIFI_MAX_RETRY      20
 /******************************************************************************/
-void Wifi_Init(const char *SSID, const char *PASS);
+void Wifi_Init(void *params);
 /******************************************************************************/
 #endif /* WIFI_H */
 /******************************************************************************/

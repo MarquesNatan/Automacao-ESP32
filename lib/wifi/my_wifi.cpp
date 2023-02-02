@@ -7,6 +7,8 @@
 char SSID[] = WIFI_SSID;
 char PASS[] = WIFI_PASS;
 /******************************************************************************/
+WiFiClient espClient;
+/******************************************************************************/
 void Wifi_Init(void *params)
 {
     if(WiFi.status() == WL_CONNECTED)

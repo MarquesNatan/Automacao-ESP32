@@ -2,6 +2,9 @@
 #include "include/system.h"
 #include "../lib/wifi/include/my_wifi.h"
 #include "../lib/mqtt/include/mqtt.h"
+#include <PubSubClient.h>
+
+extern PubSubClient MQTT;
 /******************************************************************************/
 void System_Init(void *params)
 {
@@ -9,13 +12,23 @@ void System_Init(void *params)
     // GPIO_Configure(NULL);
     
     /* Configure WIFI */
-    Serial.printf("/* Configure WIFI */\n");
     Wifi_Init(NULL);
 
     /* Configure MQTT */
-    // Mqtt_Init("https://eclipseprojects.org.com", "1883");
+    Mqtt_Start(NULL);
 
     // System_CreateTasks(tasks, sizeof(tasks));
+
+    while (1)
+    {
+        if(!MQTT.connected())
+        {
+            MQTT_tryConnect();
+        }
+
+        MQTT.loop();
+    }
+    
 
 }
 /******************************************************************************/

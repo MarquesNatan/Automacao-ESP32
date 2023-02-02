@@ -4,14 +4,11 @@
 /******************************************************************************/
 #include "Arduino.h"
 /******************************************************************************/
-void Mqtt_Init(const char *broker_address, const char *broker_port);
-void Mqtt_OnConnected(void *params);
+void Mqtt_Start(void *params);
+void MQTT_setCallback(void (*callback)(char *topic, uint8_t *data, unsigned int length));
+void MQTT_DataReceiver(char *topic, uint8_t *data, unsigned int length);
 
-void Mqtt_MesagePublish(char *message);
-char * Mqtt_MesageReceive(void *params);
-
-bool Mqtt_TopicSubscribe(char *topic);
-bool Mqtt_TopicUnscribe(char *topic);
+void MQTT_tryConnect(void);
 /******************************************************************************/
 #endif /* MQTT_H */
 /******************************************************************************/

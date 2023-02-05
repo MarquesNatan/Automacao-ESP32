@@ -1,6 +1,8 @@
 /******************************************************************************/
 #include "include/mqtt.h"
 #include "../../src/system/include/system_defs.h"
+#include "../../src/common/include/system_common.h"
+#include "../../src/common/include/board.h"
 
 #include <PubSubClient.h>
 #include <WiFi.h>
@@ -43,9 +45,22 @@ void MQTT_tryConnect(void)
         #endif /* MQTT_DEBUG */
 
         if (MQTT.connect(BOARD_ID))
-        {
-            Serial.println("Conectado ao Broker com sucesso!");
-            MQTT.subscribe("automacao/digital");
+        {   
+            #if MQTT_DEBUG  == true
+                Serial.println("Conectado ao Broker com sucesso!");
+            #endif /* MQTT_DEBUG */
+
+            /*
+             * 7db8cbb3-47f8-48a7-8c5a-d0aa81fad54b/tccautomacao/digital/
+             */
+            Serial.printf(PASTE3_SIMPLE(BOARD_ID, BOARD_BASE_TOPIC, BOARD_TOPIC_DIGITAL));
+            Serial.printf(PASTE3_SIMPLE(BOARD_ID, BOARD_BASE_TOPIC, BOARD_TOPIC_ANALOGIC));
+            Serial.printf(PASTE3_SIMPLE(BOARD_ID, BOARD_BASE_TOPIC, BOARD_TOPIC_DIGITAL));
+
+            MQTT.subscribe(PASTE3_SIMPLE(BOARD_ID, BOARD_BASE_TOPIC, BOARD_TOPIC_DIGITAL));
+            MQTT.subscribe(PASTE3_SIMPLE(BOARD_ID, BOARD_BASE_TOPIC, BOARD_TOPIC_ANALOGIC));
+            MQTT.subscribe(PASTE3_SIMPLE(BOARD_ID, BOARD_BASE_TOPIC, BOARD_TOPIC_DIGITAL));
+
         }
         else
         {
@@ -77,7 +92,7 @@ void MQTT_DataReceiver(char *topic, uint8_t *data, unsigned int length)
 {
     //@@HACK
     char msg;
-    Serial.printf("Comando recebido: %c", (char)data[0]);
+    Serial.printf("Comando recebido: %c\n", (char)data[0]);
 
     for(int i = 0; i < length; i++)
     {

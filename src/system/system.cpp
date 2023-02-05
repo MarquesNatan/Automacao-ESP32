@@ -18,17 +18,5 @@ void System_Init(void *params)
     Mqtt_Start(NULL);
 
     // System_CreateTasks(tasks, sizeof(tasks));
-
-    while (1)
-    {
-        if(!MQTT.connected())
-        {
-            MQTT_tryConnect();
-        }
-
-        MQTT.loop();
-    }
-    
-
 }
 /******************************************************************************/

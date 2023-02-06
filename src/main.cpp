@@ -1,6 +1,7 @@
 /******************************************************************************/
 #include <Arduino.h>
 #include "system/include/system.h"
+#include "system/include/system_defs.h"
 #include "../mqtt/include/mqtt.h"
 
 #include <PubSubClient.h>
@@ -20,14 +21,16 @@ void setup()
 /******************************************************************************/
 void loop()
 {
-  while (1)
+  #if MQTT_ENABLE == true
+    while (1)
     {
-        if(!MQTT.connected())
-        {
-            MQTT_tryConnect();
-        }
+      if(!MQTT.connected())
+      {
+        MQTT_tryConnect();
+      }
 
-        MQTT.loop();
+      MQTT.loop();
     }
+  #endif /* MQTT_ENABLE */
 }
 /******************************************************************************/

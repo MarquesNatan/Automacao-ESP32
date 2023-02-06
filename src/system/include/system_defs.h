@@ -15,7 +15,9 @@
     #define MQTT_DEBUG                  false
 #endif
 
-// #define MQTT_PUBLIC_BROKER              "mqtt.eclipseprojects.io"
+#define MQTT_ENABLE                     true
+
+//#define MQTT_PUBLIC_BROKER              "mqtt.eclipseprojects.io"
 #define MQTT_PUBLIC_BROKER                  "broker.mqttdashboard.com"
 #define MQTT_PORT                       MQTT_PORT_DEFAULT
 

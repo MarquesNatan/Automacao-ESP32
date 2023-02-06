@@ -4,6 +4,8 @@
 #include "../../src/common/include/system_common.h"
 #include "../../src/common/include/board.h"
 
+#include "../commands/include/command.h"
+
 #include <PubSubClient.h>
 #include <WiFi.h>
 /******************************************************************************/
@@ -53,9 +55,14 @@ void MQTT_tryConnect(void)
             /*
              * 7db8cbb3-47f8-48a7-8c5a-d0aa81fad54b/tccautomacao/digital/
              */
-            Serial.printf(PASTE3_SIMPLE(BOARD_ID, BOARD_BASE_TOPIC, BOARD_TOPIC_DIGITAL));
-            Serial.printf(PASTE3_SIMPLE(BOARD_ID, BOARD_BASE_TOPIC, BOARD_TOPIC_ANALOGIC));
-            Serial.printf(PASTE3_SIMPLE(BOARD_ID, BOARD_BASE_TOPIC, BOARD_TOPIC_DIGITAL));
+            #if MQTT_DEBUG  == true
+                Serial.printf(PASTE3_SIMPLE(BOARD_ID, BOARD_BASE_TOPIC, BOARD_TOPIC_DIGITAL));
+                Serial.println();
+                Serial.printf(PASTE3_SIMPLE(BOARD_ID, BOARD_BASE_TOPIC, BOARD_TOPIC_ANALOGIC));
+                Serial.println();
+                Serial.printf(PASTE3_SIMPLE(BOARD_ID, BOARD_BASE_TOPIC, BOARD_TOPIC_DIGITAL));
+                Serial.println();
+            #endif /* MQTT_DEBUG */
 
             MQTT.subscribe(PASTE3_SIMPLE(BOARD_ID, BOARD_BASE_TOPIC, BOARD_TOPIC_DIGITAL));
             MQTT.subscribe(PASTE3_SIMPLE(BOARD_ID, BOARD_BASE_TOPIC, BOARD_TOPIC_ANALOGIC));
@@ -86,26 +93,18 @@ void MQTT_setCallback(void (*callback)(char *topic, uint8_t *data, unsigned int 
     mqtt_callback_func = callback;
 }
 /******************************************************************************/
-//@@HACK
-#define LED     2
 void MQTT_DataReceiver(char *topic, uint8_t *data, unsigned int length)
 {
-    //@@HACK
-    char msg;
-    Serial.printf("Comando recebido: %c\n", (char)data[0]);
 
-    for(int i = 0; i < length; i++)
-    {
-        msg = (char)data[0];
-    }
+    command_t command; 
+    command = Command_Parse(data);
 
-    if(msg == '0')
-    {
-        digitalWrite(LED, LOW);
-    }
-    if(msg == '1')
-    {
-        digitalWrite(LED, HIGH);
-    }
+    #if MQTT_DEBUG == true
+        Serial.printf("\n");
+        Serial.printf("Command Type:  %c\n", (char)command.command[0]);
+        Serial.printf("Command index: %c\n", (char)command.command[1]);
+        Serial.printf("Command value: %c\n", (char)command.command[2]);
+    #endif /* MQTT_DEBUG */
+
 }
 /******************************************************************************/

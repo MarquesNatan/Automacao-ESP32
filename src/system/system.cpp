@@ -1,5 +1,6 @@
 /******************************************************************************/
 #include "include/system.h"
+#include "include/system_defs.h"
 #include "../lib/wifi/include/my_wifi.h"
 #include "../lib/mqtt/include/mqtt.h"
 #include <PubSubClient.h>
@@ -15,7 +16,9 @@ void System_Init(void *params)
     Wifi_Init(NULL);
 
     /* Configure MQTT */
-    Mqtt_Start(NULL);
+    #if MQTT_ENABLE == true
+        Mqtt_Start(NULL);
+    #endif /* MQTT_ENABLE */
 
     // System_CreateTasks(tasks, sizeof(tasks));
 }

@@ -10,15 +10,17 @@
 #if defined SYSTEM_BUILD_TYPE && SYSTEM_BUILD_TYPE == DEBUG
     #define WIFI_DEBUG                  true
     #define MQTT_DEBUG                  true
+    #define COMMAND_DEBUG               true
 #else
     #define WIFI_DEBUG                  false
     #define MQTT_DEBUG                  false
+    #define COMMAND_DEBUG               false
 #endif
 
 #define MQTT_ENABLE                     true
 
-//#define MQTT_PUBLIC_BROKER              "mqtt.eclipseprojects.io"
-#define MQTT_PUBLIC_BROKER                  "broker.mqttdashboard.com"
+#define MQTT_PUBLIC_BROKER              "mqtt.eclipseprojects.io"
+// #define MQTT_PUBLIC_BROKER                  "broker.mqttdashboard.com"
 #define MQTT_PORT                       MQTT_PORT_DEFAULT
 
 #define MQTT_SECURITY_LEVEL             UNENCRYPTED

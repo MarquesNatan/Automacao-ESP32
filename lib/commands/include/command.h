@@ -8,7 +8,7 @@
 /******************************************************************************/
 typedef struct 
 {
-    uint8_t command[PARAMS_IN_COMMAND];
+    uint8_t data[PARAMS_IN_COMMAND];
 }command_t;
 /******************************************************************************/
 command_t Command_Parse(uint8_t *comm);

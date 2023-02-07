@@ -56,17 +56,18 @@ void MQTT_tryConnect(void)
              * 7db8cbb3-47f8-48a7-8c5a-d0aa81fad54b/tccautomacao/digital/
              */
             #if MQTT_DEBUG  == true
+                Serial.println("\n");
                 Serial.printf(PASTE3_SIMPLE(BOARD_ID, BOARD_BASE_TOPIC, BOARD_TOPIC_DIGITAL));
-                Serial.println();
+                Serial.println("\n");
                 Serial.printf(PASTE3_SIMPLE(BOARD_ID, BOARD_BASE_TOPIC, BOARD_TOPIC_ANALOGIC));
-                Serial.println();
+                Serial.println("\n");
                 Serial.printf(PASTE3_SIMPLE(BOARD_ID, BOARD_BASE_TOPIC, BOARD_TOPIC_DIGITAL));
-                Serial.println();
+                Serial.println("\n");
             #endif /* MQTT_DEBUG */
 
             MQTT.subscribe(PASTE3_SIMPLE(BOARD_ID, BOARD_BASE_TOPIC, BOARD_TOPIC_DIGITAL));
             MQTT.subscribe(PASTE3_SIMPLE(BOARD_ID, BOARD_BASE_TOPIC, BOARD_TOPIC_ANALOGIC));
-            MQTT.subscribe(PASTE3_SIMPLE(BOARD_ID, BOARD_BASE_TOPIC, BOARD_TOPIC_DIGITAL));
+            MQTT.subscribe(PASTE3_SIMPLE(BOARD_ID, BOARD_BASE_TOPIC, BOARD_TOPIC_SENSOR));
 
         }
         else
@@ -95,15 +96,17 @@ void MQTT_setCallback(void (*callback)(char *topic, uint8_t *data, unsigned int 
 /******************************************************************************/
 void MQTT_DataReceiver(char *topic, uint8_t *data, unsigned int length)
 {
-
+    #if MQTT_DEBUG == false
+        Serial.printf("Command:  %s\n", data);
+    #endif /* MQTT_DEBUG */
     command_t command; 
     command = Command_Parse(data);
 
-    #if MQTT_DEBUG == true
+    #if MQTT_DEBUG == false
         Serial.printf("\n");
-        Serial.printf("Command Type:  %c\n", (char)command.command[0]);
-        Serial.printf("Command index: %c\n", (char)command.command[1]);
-        Serial.printf("Command value: %c\n", (char)command.command[2]);
+        Serial.printf("TIPO DE COMANDO:  %c\n", (char)command.data[0]);
+        Serial.printf("PINO: %c\n", (char)command.data[1]);
+        Serial.printf("VALOR: %c\n", (char)command.data[2]);
     #endif /* MQTT_DEBUG */
 
 }

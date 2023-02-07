@@ -1,16 +1,19 @@
 /******************************************************************************/
+#include <PubSubClient.h>
+
 #include "include/system.h"
 #include "include/system_defs.h"
+
+#include "../App/peripheral/include/peripheral_controller.h"
 #include "../lib/wifi/include/my_wifi.h"
 #include "../lib/mqtt/include/mqtt.h"
-#include <PubSubClient.h>
 
 extern PubSubClient MQTT;
 /******************************************************************************/
 void System_Init(void *params)
 {
     /* Configure IO */
-    // GPIO_Configure(NULL);
+    Peripheral_Init(NULL);
     
     /* Configure WIFI */
     Wifi_Init(NULL);

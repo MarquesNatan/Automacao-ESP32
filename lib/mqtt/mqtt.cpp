@@ -10,6 +10,7 @@
 #include <WiFi.h>
 /******************************************************************************/
 extern WiFiClient espClient;
+/******************************************************************************/
 PubSubClient MQTT(espClient);
 /******************************************************************************/
 static void(*mqtt_callback_func)(char *topic, uint8_t *data, unsigned int length);
@@ -96,9 +97,6 @@ void MQTT_setCallback(void (*callback)(char *topic, uint8_t *data, unsigned int 
 /******************************************************************************/
 void MQTT_DataReceiver(char *topic, uint8_t *data, unsigned int length)
 {
-    #if MQTT_DEBUG == false
-        Serial.printf("Command:  %s\n", data);
-    #endif /* MQTT_DEBUG */
     command_t command; 
     command = Command_Parse(data);
 
@@ -109,5 +107,20 @@ void MQTT_DataReceiver(char *topic, uint8_t *data, unsigned int length)
         Serial.printf("VALOR: %c\n", (char)command.data[2]);
     #endif /* MQTT_DEBUG */
 
+}
+/******************************************************************************/
+bool MQTT_Publish(const char *message, const char *topic)
+{
+    bool result = false;
+    result  = MQTT.publish(topic, message);
+
+    if(!result)
+    {
+        #if MQTT_DEBUG == true
+            Serial.printf("Erro, não foi possível publicar a sua mensagem");
+        #endif /* MQTT_DEBUG */
+    }
+
+    return result;
 }
 /******************************************************************************/

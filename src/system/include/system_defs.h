@@ -18,6 +18,7 @@
 #endif
 
 #define MQTT_ENABLE                     true
+#define MQTT_MAX_QUEUE_LENGTH           5
 
 #define MQTT_PUBLIC_BROKER              "mqtt.eclipseprojects.io"
 // #define MQTT_PUBLIC_BROKER                  "broker.mqttdashboard.com"

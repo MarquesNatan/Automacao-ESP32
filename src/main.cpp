@@ -2,11 +2,12 @@
 #include <Arduino.h>
 #include "system/include/system.h"
 #include "system/include/system_defs.h"
+#include "App/main/include/main_app.h"
+
 #include "../mqtt/include/mqtt.h"
+#include "../commands/include/command.h"
 
 #include <PubSubClient.h>
-/******************************************************************************/
-extern PubSubClient MQTT;
 /******************************************************************************/
 void setup()
 {
@@ -21,16 +22,6 @@ void setup()
 /******************************************************************************/
 void loop()
 {
-  #if MQTT_ENABLE == true
-    while (1)
-    {
-      if(!MQTT.connected())
-      {
-        MQTT_tryConnect();
-      }
-
-      MQTT.loop();
-    }
-  #endif /* MQTT_ENABLE */
+  main_app(NULL);
 }
 /******************************************************************************/

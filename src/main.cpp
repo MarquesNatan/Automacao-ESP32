@@ -12,7 +12,7 @@
 void setup()
 {
   Serial.begin(115200);
-  pinMode(2, OUTPUT);
+  // pinMode(2, OUTPUT);
   /* System Configuration */
   System_Init(NULL);
 

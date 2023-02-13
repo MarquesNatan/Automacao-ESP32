@@ -2,19 +2,25 @@
 #ifndef BOARD_PERIPHERAL_H
 #define BOARD_PERIPHERAL_H
 /******************************************************************************/
-#define PIN_DIGITAL_OUTPUT_0                    0
-#define PIN_DIGITAL_OUTPUT_1                    1
-#define PIN_DIGITAL_OUTPUT_2                    2
-#define PIN_DIGITAL_OUTPUT_3                    3
-#define PIN_DIGITAL_OUTPUT_4                    4
+#include "../../system/include/system_defs.h"
+/******************************************************************************/
+#if defined SYSTEM_BUILD_TYPE && SYSTEM_BUILD_TYPE == DEBUG
+    
+    #define PIN_DIGITAL_OUTPUT_0                    15
+    #define PIN_DIGITAL_OUTPUT_1                    2
+    #define PIN_DIGITAL_OUTPUT_2                    0
+    #define PIN_DIGITAL_OUTPUT_3                    4
+    #define PIN_DIGITAL_OUTPUT_4                    13
 
-#define PIN_ANALOGIC_OUTPUT_0                   0
-#define PIN_ANALOGIC_OUTPUT_1                   1
-#define PIN_ANALOGIC_OUTPUT_2                   2
+#elif defined SYSTEM_BUILD_TYPE && SYSTEM_BUILD_TYPE == RELEASE
 
-#define PIN_DIGITAL_SENSOR_TEMP                 0
-#define PIN_DIGITAL_SENSOR_HUM                  1
-#define PIN_DIGITAL_SENSOR_LUM                  2
+    #define PIN_DIGITAL_OUTPUT_0                    0
+    #define PIN_DIGITAL_OUTPUT_1                    1
+    #define PIN_DIGITAL_OUTPUT_2                    2
+    #define PIN_DIGITAL_OUTPUT_3                    3
+    #define PIN_DIGITAL_OUTPUT_4                    4
+
+#endif /* SYSTEM_BUILD_TYPE */
 /******************************************************************************/
 #endif /* BOARD_PERIPHERAL_H */
 /******************************************************************************/

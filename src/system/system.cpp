@@ -17,7 +17,10 @@ extern QueueHandle_t commQueue;
 void System_Init(void *params)
 {
     /* Configure IO */
-    // Peripheral_Init(NULL);
+    Peripheral_Init(NULL);
+
+    // digitalWrite(13, HIGH);
+    // digitalWrite(15, HIGH);
 
     /* Start Command queue */
     Command_CreateQueue(10, &commQueue);

@@ -98,15 +98,20 @@ void MQTT_setCallback(void (*callback)(char *topic, uint8_t *data, unsigned int 
 void MQTT_DataReceiver(char *topic, uint8_t *data, unsigned int length)
 {
     command_t command; 
-    command = Command_Parse(data);
 
-    #if MQTT_DEBUG == false
-        Serial.printf("\n");
-        Serial.printf("TIPO DE COMANDO:  %c\n", (char)command.data[0]);
-        Serial.printf("PINO: %c\n", (char)command.data[1]);
-        Serial.printf("VALOR: %c\n", (char)command.data[2]);
+    if(data != NULL)
+    {
+        command = Command_Parse(data);
+    }
+
+    #if COMMAND_DEBUG == true
+        Serial.println();
+        Serial.printf("*******************************\n");
+        Serial.printf("* COMANDO:  %i                *\n", (char)command.data[0]);
+        Serial.printf("* PINO:     %i                *\n", (char)command.data[1]);
+        Serial.printf("* VALOR:    %i                *\n", (char)command.data[2]);
+        Serial.printf("*******************************\n\n");
     #endif /* MQTT_DEBUG */
-
 }
 /******************************************************************************/
 bool MQTT_Publish(const char *message, const char *topic)

@@ -16,8 +16,13 @@ void Peripheral_Init(void *params)
     /* Configure Analogic outputs */
 }
 /******************************************************************************/
-inline static void Peripheral_DigitalConfigure(uint8_t pin, uint8_t type)
+void Peripheral_DigitalConfigure(uint8_t pin, uint8_t type)
 {
     pinMode(pin, type);
+}
+/******************************************************************************/
+void Peripheral_DigitalWrite(uint8_t num, uint8_t state)
+{
+    digitalWrite(num, state);
 }
 /******************************************************************************/

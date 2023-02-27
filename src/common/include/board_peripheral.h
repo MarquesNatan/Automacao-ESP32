@@ -12,6 +12,9 @@
     #define PIN_DIGITAL_OUTPUT_3                    4
     #define PIN_DIGITAL_OUTPUT_4                    13
 
+    #define PIN_DIGITAL_INPUT_0                     23
+    #define PIN_DIGITAL_INPUT_1                     39
+
 #elif defined SYSTEM_BUILD_TYPE && SYSTEM_BUILD_TYPE == RELEASE
 
     #define PIN_DIGITAL_OUTPUT_0                    0

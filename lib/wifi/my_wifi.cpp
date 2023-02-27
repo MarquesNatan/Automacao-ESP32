@@ -17,9 +17,9 @@ void Wifi_Init(void *params)
     }
 
     #if WIFI_DEBUG == true
-        Serial.printf("Conetando-se a rede: Meu teste ");
-        Serial.printf(WIFI_SSID);
-        Serial.printf("\nEspere a conexão completa");
+        Serial.printf("*********************************************");
+        Serial.printf("\n* Conetando-se a rede: %s      *", WIFI_SSID);
+        Serial.printf("\n*********************************************\n");
     #endif /* WIFI_DEBUG */
 
     WiFi.begin(WIFI_SSID, WIFI_PASS);
@@ -32,10 +32,10 @@ void Wifi_Init(void *params)
     }
 
     #if WIFI_DEBUG == true
-        Serial.print("\n\nConectado com sucesso ");
-        Serial.print(SSID);  
-        Serial.print("  IP obtido: ");
-        Serial.println(WiFi.localIP()); 
+        Serial.printf("\n*********************************************");
+        Serial.printf("\nConectado com sucesso, IP obtido: ");
+        Serial.print(WiFi.localIP());
+        Serial.printf("\n*********************************************");
     #endif /* WIFI_DEBUG */
 }
 /******************************************************************************/

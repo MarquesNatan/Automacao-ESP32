@@ -6,18 +6,14 @@
 
 #include "../mqtt/include/mqtt.h"
 #include "../commands/include/command.h"
+#include "../lib/RTC/include/rtc.h"
 
 #include <PubSubClient.h>
+#include "RTClib.h"
 /******************************************************************************/
 void setup()
 {
-  Serial.begin(115200);
-  // pinMode(2, OUTPUT);
-  /* System Configuration */
   System_Init(NULL);
-
-  /* System task start */
-  /* Tasks Create */
 }
 /******************************************************************************/
 void loop()

@@ -1,13 +1,9 @@
 /******************************************************************************/
-#ifndef MAIN_APP_H
-#define MAIN_APP_H
+#ifndef INTERRUPT_H
+#define INTERRUPT_H
 /******************************************************************************/
-void main_app(void *params);
-
-void mqttHandleTask(void *params);
-void commandHandleTask(void *params);
-void switchManagerTask(void *params);
-void rtcHandleTask(void *params);
+void Interrupt_Config(void *params);
+void IRAM_ATTR ISR_Handle(void);
 /******************************************************************************/
-#endif /* MAIN_APP_H*/
+#endif /* INTERRUPT_H */
 /******************************************************************************/

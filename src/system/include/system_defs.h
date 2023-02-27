@@ -11,6 +11,8 @@
     #define WIFI_DEBUG                  true
     #define MQTT_DEBUG                  true
     #define COMMAND_DEBUG               true
+    #define RTC_DEBUG                   true
+    #define ISR_DEBUG                   true
 #else
     #define WIFI_DEBUG                  false
     #define MQTT_DEBUG                  false

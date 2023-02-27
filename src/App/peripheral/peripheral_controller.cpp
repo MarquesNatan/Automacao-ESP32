@@ -13,7 +13,10 @@ void Peripheral_Init(void *params)
     Peripheral_DigitalConfigure(PIN_DIGITAL_OUTPUT_3, OUTPUT);
     Peripheral_DigitalConfigure(PIN_DIGITAL_OUTPUT_4, OUTPUT);
 
-    /* Configure Analogic outputs */
+    /* Pinos para entrada do interruptor */
+    pinMode(PIN_DIGITAL_INPUT_0, INPUT_PULLDOWN);
+
+    Serial.begin(115200);
 }
 /******************************************************************************/
 void Peripheral_DigitalConfigure(uint8_t pin, uint8_t type)

@@ -10,21 +10,20 @@
 #include <WiFi.h>
 /******************************************************************************/
 extern WiFiClient espClient;
-/******************************************************************************/
 PubSubClient MQTT(espClient);
-/******************************************************************************/
 static void(*mqtt_callback_func)(char *topic, uint8_t *data, unsigned int length);
 /******************************************************************************/
 void Mqtt_Start(void *params)
 {
     MQTT_setCallback(MQTT_DataReceiver);
+    
     MQTT.setServer(MQTT_PUBLIC_BROKER, MQTT_PORT);
 
     if(mqtt_callback_func != NULL)
     {
         MQTT.setCallback(mqtt_callback_func);
         #if MQTT_DEBUG  == true
-            Serial.printf("Função de callback definida.");
+            Serial.printf("\nFunção de callback definida.\n");
         #endif /* MQTT_DEBUG */
     }
     else 
@@ -43,14 +42,15 @@ void MQTT_tryConnect(void)
     while (!MQTT.connected())
     {
         #if MQTT_DEBUG  == true
-            Serial.print("Conectando ao Broker MQTT: ");
-            Serial.println(MQTT_PUBLIC_BROKER);
+            Serial.printf("******************************************************");
+            Serial.printf("\n* Conectando ao Broker MQTT: %s\n*", MQTT_PUBLIC_BROKER);
+            Serial.printf("******************************************************");
         #endif /* MQTT_DEBUG */
 
         if (MQTT.connect(BOARD_ID))
         {   
             #if MQTT_DEBUG  == true
-                Serial.println("Conectado ao Broker com sucesso!");
+                Serial.println("\r\nConectado ao Broker com sucesso!\r\n");
             #endif /* MQTT_DEBUG */
 
             /*
@@ -64,27 +64,26 @@ void MQTT_tryConnect(void)
                 Serial.println("\n");
                 Serial.printf(PASTE3_SIMPLE(BOARD_ID, BOARD_BASE_TOPIC, BOARD_TOPIC_DIGITAL));
                 Serial.println("\n");
+                Serial.printf(PASTE3_SIMPLE(BOARD_ID, BOARD_BASE_TOPIC, BOAD_TOPIC_TASK));
+                Serial.println("\n");
             #endif /* MQTT_DEBUG */
 
             MQTT.subscribe(PASTE3_SIMPLE(BOARD_ID, BOARD_BASE_TOPIC, BOARD_TOPIC_DIGITAL));
             MQTT.subscribe(PASTE3_SIMPLE(BOARD_ID, BOARD_BASE_TOPIC, BOARD_TOPIC_ANALOGIC));
             MQTT.subscribe(PASTE3_SIMPLE(BOARD_ID, BOARD_BASE_TOPIC, BOARD_TOPIC_SENSOR));
+            MQTT.subscribe(PASTE3_SIMPLE(BOARD_ID, BOARD_BASE_TOPIC, BOAD_TOPIC_TASK));
 
         }
         else
         {
-            #if MQTT_DEBUG  == true
-                Serial.println("Erro durante a conexão.");
-            #endif /* MQTT_DEBUG */
             while(temp != 0)
-            {
-                delay(1000);
-                
+            {   
                 #if MQTT_DEBUG  == true
-                    Serial.printf("Nova tentatica de conexao em: ", temp);
+                    Serial.printf("Nova tentativa de conexao em: %i\n", temp);
                 #endif /* MQTT_DEBUG */
 
                 temp = temp - 1;
+                delay(1000);
             }
         }
     }

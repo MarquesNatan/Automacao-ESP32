@@ -3,6 +3,7 @@
 #define INTERRUPT_H
 /******************************************************************************/
 void Interrupt_Config(void *params);
+void IRAM_ATTR ISR_HandleAux(void *args);
 void IRAM_ATTR ISR_Handle(void);
 /******************************************************************************/
 #endif /* INTERRUPT_H */

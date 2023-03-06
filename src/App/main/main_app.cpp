@@ -17,13 +17,16 @@
 /******************************************************************************/
 extern PubSubClient MQTT;
 extern QueueHandle_t commQueue;
+extern QueueHandle_t commandQueue;
+extern command_packet_t newCommand;
 extern volatile unsigned long ISRCount;
 extern volatile bool ISRIsTrigged;
+extern volatile uint8_t argsValue;
 /******************************************************************************/
 void main_app(void *params)
 {
-    xTaskCreate(commandHandleTask, "command handle", 4096, NULL, 1, NULL);
     xTaskCreate(switchManagerTask, "switch handle", 4096, NULL, 1, NULL);
+    xTaskCreate(commandExecuteTask, "command execute", 4096, NULL, 1, NULL);
     // xTaskCreate(rtcHandleTask, "rtc handle", 4096, NULL, 1, NULL);
 
     while (true)
@@ -42,37 +45,26 @@ void main_app(void *params)
     }
 }
 /******************************************************************************/
-void commandHandleTask(void *params)
+void commandExecuteTask(void *params)
 {
-    /* Manage outputs */
-    uint8_t type = 255;
-    uint8_t outputNum = 255;
-    uint8_t newState = 255;
 
-    command_t command;
     uint8_t isEmpty = 0;
+    command_packet_t localCommand;
 
-    while (true)
+    while(1)
     {
-
-        isEmpty = xQueueReceive(commQueue, &command, 0);
+        isEmpty = xQueueReceive(commandQueue, &localCommand, 0);
         if (isEmpty != errQUEUE_EMPTY || isEmpty != errQUEUE_FULL)
         {
-            type = command.data[0];
-            outputNum = command.data[1];
-            newState = command.data[2];
-
-            if(type == 0)
+            if(commandIsValid(&localCommand))
             {
-                RelayManager(outputNum, newState);
-            }
-            else 
-            {
-                // AnalogicManager(index, value);
+                #if COMMAND_DEBUG == true
+                    Serial.printf("Comando sem erros, pode ser processado.\n");
+                #endif /* COMMAND_DEBUG */   
             }
         }
 
-        vTaskDelay(500 / portTICK_PERIOD_MS);
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
 }
 /******************************************************************************/
@@ -80,17 +72,22 @@ void switchManagerTask(void *params)
 {
     volatile uint8_t pinValue = 0;
     uint8_t newValue = 0;
+    uint8_t pin;
     while(true)
     {
         if(ISRIsTrigged)
         {
             ISRIsTrigged = false;
-            pinValue = digitalRead(PIN_DIGITAL_OUTPUT_1);
+            (argsValue == PIN_SWITCH_0) ? pin = PIN_RELAY_0 : pin = PIN_RELAY_1;
+
+            pinValue = digitalRead(pin);
             (pinValue == 0) ? newValue = 1 : newValue = 0;
-            digitalWrite(PIN_DIGITAL_OUTPUT_1, newValue);
-            Serial.printf("Valor pino: %i | Valor Interrupção: %i\n", newValue, ISRCount);
+            digitalWrite(pin, newValue);
+
+            Serial.printf("ISR count: %i\n", ISRCount);
         }
 
+        vTaskDelay(100 / portTICK_PERIOD_MS);
     }
 }
 /******************************************************************************/
@@ -102,7 +99,8 @@ void rtcHandleTask(void *params)
     {
         now = RTC_GetTime(NULL);
 
-        Serial.printf("%i/%i/%i - %i:%i:%i\n", now.day(), now.month(), now.year(), now.hour(), now.minute(), now.second());
+        Serial.printf("%i/%i/%i - %i:%i:%i\n", now.day(), now.month(), now.year(), 
+                                               now.hour(), now.minute(), now.second());
         vTaskDelay(1000/portTICK_PERIOD_MS);
     }
 }

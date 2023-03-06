@@ -9,6 +9,10 @@
 #include <PubSubClient.h>
 #include <WiFi.h>
 /******************************************************************************/
+extern uint8_t *ptrParams[3];
+extern QueueHandle_t commandQueue;
+extern command_packet_t newCommand;
+/******************************************************************************/
 extern WiFiClient espClient;
 PubSubClient MQTT(espClient);
 static void(*mqtt_callback_func)(char *topic, uint8_t *data, unsigned int length);
@@ -21,18 +25,18 @@ void Mqtt_Start(void *params)
 
     if(mqtt_callback_func != NULL)
     {
-        MQTT.setCallback(mqtt_callback_func);
+        MQTT.setCallback(MQTT_DataReceiver);
         #if MQTT_DEBUG  == true
             Serial.printf("\nFunção de callback definida.\n");
         #endif /* MQTT_DEBUG */
     }
-    else 
-    {
-        #if MQTT_DEBUG  == true
+    #if MQTT_DEBUG  == true
+        else 
+        {
             Serial.printf("Erro, função de callback não definida");
-        #endif /* MQTT_DEBUG */
-        while (true);
-    }
+            while (true);
+        }
+    #endif /* MQTT_DEBUG */
 }
 /******************************************************************************/
 void MQTT_tryConnect(void)
@@ -50,12 +54,9 @@ void MQTT_tryConnect(void)
         if (MQTT.connect(BOARD_ID))
         {   
             #if MQTT_DEBUG  == true
-                Serial.println("\r\nConectado ao Broker com sucesso!\r\n");
+                Serial.println("\nConectado ao Broker com sucesso!\n");
             #endif /* MQTT_DEBUG */
 
-            /*
-             * 7db8cbb3-47f8-48a7-8c5a-d0aa81fad54b/tccautomacao/digital/
-             */
             #if MQTT_DEBUG  == true
                 Serial.println("\n");
                 Serial.printf(PASTE3_SIMPLE(BOARD_ID, BOARD_BASE_TOPIC, BOARD_TOPIC_DIGITAL));
@@ -64,15 +65,11 @@ void MQTT_tryConnect(void)
                 Serial.println("\n");
                 Serial.printf(PASTE3_SIMPLE(BOARD_ID, BOARD_BASE_TOPIC, BOARD_TOPIC_DIGITAL));
                 Serial.println("\n");
-                Serial.printf(PASTE3_SIMPLE(BOARD_ID, BOARD_BASE_TOPIC, BOAD_TOPIC_TASK));
-                Serial.println("\n");
-            #endif /* MQTT_DEBUG */
+            #endif  /* MQTT_DEBUG */
 
             MQTT.subscribe(PASTE3_SIMPLE(BOARD_ID, BOARD_BASE_TOPIC, BOARD_TOPIC_DIGITAL));
             MQTT.subscribe(PASTE3_SIMPLE(BOARD_ID, BOARD_BASE_TOPIC, BOARD_TOPIC_ANALOGIC));
             MQTT.subscribe(PASTE3_SIMPLE(BOARD_ID, BOARD_BASE_TOPIC, BOARD_TOPIC_SENSOR));
-            MQTT.subscribe(PASTE3_SIMPLE(BOARD_ID, BOARD_BASE_TOPIC, BOAD_TOPIC_TASK));
-
         }
         else
         {
@@ -97,20 +94,30 @@ void MQTT_setCallback(void (*callback)(char *topic, uint8_t *data, unsigned int 
 void MQTT_DataReceiver(char *topic, uint8_t *data, unsigned int length)
 {
     command_t command; 
-
-    if(data != NULL)
+    uint8_t i = 0;
+    if(getCommand(data, length))
     {
-        command = Command_Parse(data);
+        if(newCommand.status == COMMAND_VALIDATION_WAIT)
+        {
+            xQueueSendToBack(commandQueue, &newCommand, portMAX_DELAY);
+            
+            #if COMMAND_DEBUG == true
+                Serial.printf("Comando inserido na fila\n");
+            #endif /* COMMAND_DEBUG */
+        }
+        #if COMMAND_DEBUG == true
+            else 
+            {
+                Serial.printf("\nCommando não inserido na fila.\n");
+            }
+        #endif /* COMMAND_DEBUG */
     }
-
     #if COMMAND_DEBUG == true
-        Serial.println();
-        Serial.printf("*******************************\n");
-        Serial.printf("* COMANDO:  %i                *\n", (char)command.data[0]);
-        Serial.printf("* PINO:     %i                *\n", (char)command.data[1]);
-        Serial.printf("* VALOR:    %i                *\n", (char)command.data[2]);
-        Serial.printf("*******************************\n\n");
-    #endif /* MQTT_DEBUG */
+        else 
+        {
+            Serial.printf("Erro durante e copia do comando.");
+        }
+    #endif /* COMMAND_DEBUG */
 }
 /******************************************************************************/
 bool MQTT_Publish(const char *message, const char *topic)

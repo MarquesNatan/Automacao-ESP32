@@ -7,14 +7,14 @@
 void Peripheral_Init(void *params)
 {
     /* Configure digital outputs */
-    Peripheral_DigitalConfigure(PIN_DIGITAL_OUTPUT_0, OUTPUT);
-    Peripheral_DigitalConfigure(PIN_DIGITAL_OUTPUT_1, OUTPUT);
-    Peripheral_DigitalConfigure(PIN_DIGITAL_OUTPUT_2, OUTPUT);
-    Peripheral_DigitalConfigure(PIN_DIGITAL_OUTPUT_3, OUTPUT);
-    Peripheral_DigitalConfigure(PIN_DIGITAL_OUTPUT_4, OUTPUT);
+    Peripheral_DigitalConfigure(PIN_RELAY_0, OUTPUT);
+    Peripheral_DigitalConfigure(PIN_RELAY_1, OUTPUT);
+    Peripheral_DigitalConfigure(PIN_RELAY_2, OUTPUT);
+    Peripheral_DigitalConfigure(PIN_RELAY_3, OUTPUT);
+    Peripheral_DigitalConfigure(PIN_RELAY_4, OUTPUT);
 
     /* Pinos para entrada do interruptor */
-    pinMode(PIN_DIGITAL_INPUT_0, INPUT_PULLDOWN);
+    pinMode(PIN_SWITCH_0, INPUT_PULLDOWN);
 
     Serial.begin(115200);
 }

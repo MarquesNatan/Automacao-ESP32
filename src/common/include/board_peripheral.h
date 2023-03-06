@@ -6,14 +6,14 @@
 /******************************************************************************/
 #if defined SYSTEM_BUILD_TYPE && SYSTEM_BUILD_TYPE == DEBUG
     
-    #define PIN_DIGITAL_OUTPUT_0                    15
-    #define PIN_DIGITAL_OUTPUT_1                    2
-    #define PIN_DIGITAL_OUTPUT_2                    0
-    #define PIN_DIGITAL_OUTPUT_3                    4
-    #define PIN_DIGITAL_OUTPUT_4                    13
+    #define PIN_RELAY_0                     2
+    #define PIN_RELAY_1                     0
+    #define PIN_RELAY_2                     4
+    #define PIN_RELAY_3                     16
+    #define PIN_RELAY_4                     17
 
-    #define PIN_DIGITAL_INPUT_0                     23
-    #define PIN_DIGITAL_INPUT_1                     39
+    #define PIN_SWITCH_0                     32 
+    #define PIN_SWITCH_1                     33
 
 #elif defined SYSTEM_BUILD_TYPE && SYSTEM_BUILD_TYPE == RELEASE
 

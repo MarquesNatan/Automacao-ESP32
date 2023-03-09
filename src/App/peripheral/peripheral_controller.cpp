@@ -13,8 +13,20 @@ void Peripheral_Init(void *params)
     Peripheral_DigitalConfigure(PIN_RELAY_3, OUTPUT);
     Peripheral_DigitalConfigure(PIN_RELAY_4, OUTPUT);
 
+    digitalWrite(PIN_RELAY_0, LOW);
+    digitalWrite(PIN_RELAY_1, LOW);
+    digitalWrite(PIN_RELAY_2, LOW);
+    digitalWrite(PIN_RELAY_3, LOW);
+    digitalWrite(PIN_RELAY_4, LOW);
+    
+
     /* Pinos para entrada do interruptor */
     pinMode(PIN_SWITCH_0, INPUT_PULLDOWN);
+    digitalWrite(PIN_SWITCH_0, LOW);
+
+    /* Pinos de entrada analógica */
+    pinMode(36, INPUT);
+    digitalWrite(36, LOW);
 
     Serial.begin(115200);
 }

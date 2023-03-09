@@ -15,6 +15,9 @@
     #define PIN_SWITCH_0                     32 
     #define PIN_SWITCH_1                     33
 
+    #define PIN_ZCD_0                        PIN_SWITCH_0
+    #define PIN_TRIAC_ENABLE                 24
+
 #elif defined SYSTEM_BUILD_TYPE && SYSTEM_BUILD_TYPE == RELEASE
 
     #define PIN_DIGITAL_OUTPUT_0                    0

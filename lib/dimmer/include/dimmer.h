@@ -1,13 +1,9 @@
 /******************************************************************************/
-#ifndef MAIN_APP_H
-#define MAIN_APP_H
+#ifndef DIMMER_H
+#define DIMMER_H
 /******************************************************************************/
-void main_app(void *params);
-
-void switchManagerTask(void *params);
-void commandExecuteTask(void *params);
-void DimmerInputReadTask(void *params);
-void rtcHandleTask(void *params);
+void DimmerZCDTrigger_Config(void);
+void DimmerZCDTrigger(void);
 /******************************************************************************/
-#endif /* MAIN_APP_H*/
+#endif /* DIMMER_H */
 /******************************************************************************/

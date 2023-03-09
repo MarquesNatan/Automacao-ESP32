@@ -12,12 +12,22 @@
 #include "../lib/mqtt/include/mqtt.h"
 #include "../lib/RTC/include/rtc.h"
 #include "../lib/interrupt/include/interrupt.h"
+#include "../lib/timer/include/timer.h"
+#include "../lib/dimmer/include/dimmer.h"
 /******************************************************************************/
 extern PubSubClient MQTT;
 extern QueueHandle_t commQueue;
+extern hw_timer_t *Timer0_Cfg;
 /******************************************************************************/
 void System_Init(void *params)
 {
+    /* Inicia o Timer 0 */
+    Timer0_Config(Timer0_Cfg, 0, 80);
+
+    /* Zero Cross Detector Config */
+    DimmerZCDTrigger_Config();
+
+
     /* Configure IO */
     Peripheral_Init(NULL);
 

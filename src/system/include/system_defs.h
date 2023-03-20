@@ -5,22 +5,42 @@
 #define DEBUG                           0x00
 #define RELEASE                         0x01
 /******************************************************************************/
-#define SYSTEM_BUILD_TYPE               DEBUG
+#define SYSTEM_BUILD_TYPE               SYSTEM_BUILD
+
+#define WIFI_ENABLE                     true
+#define MQTT_ENABLE                     true
+
+#define TIMER_INDEX                     TIMER_INDEX_1
 
 #if defined SYSTEM_BUILD_TYPE && SYSTEM_BUILD_TYPE == DEBUG
-    #define WIFI_DEBUG                  true
-    #define MQTT_DEBUG                  true
+    #if defined WIFI_ENABLE && WIFI_ENABLE == true
+        #define WIFI_DEBUG                  true
+    #endif /* WIFI_ENABLE */
+
+    #if defined MQTT_ENABLE && MQTT_ENABLE == true
+        #define MQTT_DEBUG                  true
+    #endif /* MQTT_ENABLE */ 
+
     #define COMMAND_DEBUG               true
     #define RTC_DEBUG                   true
     #define ISR_DEBUG                   true
     #define DIMMER_DEBUG                true
+    #define DEBUG_FILE_SYSTEM           true
 #else
-    #define WIFI_DEBUG                  false
-    #define MQTT_DEBUG                  false
+    #if defined WIFI_ENABLE && WIFI_ENABLE == true
+        #define WIFI_DEBUG                  façse
+    #endif /* WIFI_ENABLE */
+
+    #if defined MQTT_ENABLE && MQTT_ENABLE == true
+        #define MQTT_DEBUG                  false
+    #endif /* MQTT_ENABLE */ 
+
     #define COMMAND_DEBUG               false
+    #define RTC_DEBUG                   false
+    #define ISR_DEBUG                   false
+    #define DIMMER_DEBUG                false
 #endif
 
-#define MQTT_ENABLE                     true
 #define MQTT_MAX_QUEUE_LENGTH           5
 
 #define MQTT_PUBLIC_BROKER              "mqtt.eclipseprojects.io"

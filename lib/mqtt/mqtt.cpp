@@ -4,7 +4,7 @@
 #include "../../src/common/include/system_common.h"
 #include "../../src/common/include/board.h"
 
-#include "../commands/include/command.h"
+#include "../../src/App/command/include/command.h"
 
 #include <PubSubClient.h>
 #include <WiFi.h>
@@ -16,6 +16,24 @@ extern command_packet_t newCommand;
 extern WiFiClient espClient;
 PubSubClient MQTT(espClient);
 static void(*mqtt_callback_func)(char *topic, uint8_t *data, unsigned int length);
+/******************************************************************************/
+void vTaskMqttHandleConnection(void *pvParameters)
+{
+    while (true)
+    {
+        #if MQTT_ENABLE == true
+        while (true)
+        {
+            if (!MQTT.connected())
+            {
+                MQTT_tryConnect();
+            }
+
+            MQTT.loop();
+        }
+        #endif /* MQTT_ENABLE */
+    }
+}
 /******************************************************************************/
 void Mqtt_Start(void *params)
 {
@@ -93,7 +111,7 @@ void MQTT_setCallback(void (*callback)(char *topic, uint8_t *data, unsigned int 
 /******************************************************************************/
 void MQTT_DataReceiver(char *topic, uint8_t *data, unsigned int length)
 {
-    command_t command; 
+    command_packet_t command; 
     uint8_t i = 0;
     if(getCommand(data, length))
     {

@@ -1,11 +1,10 @@
 /******************************************************************************/
-#ifndef MAIN_APP_H
-#define MAIN_APP_H
+#ifndef SWITCH_H
+#define SWITCH_H
 /******************************************************************************/
 void vTaskSwitchHandle( void *pvParameters );
-void vTaskRunCommand( void *pvParameters );
-void vTaskLedHeartbeat( void *pvParameters );
-void vTaskRTCHandle( void *pvParameters );
+void SwitchISR_Configure( void (*isrHandle)(void *args) );
+void ISR_Switch( void *args );
 /******************************************************************************/
-#endif /* MAIN_APP_H*/
+#endif /* SWITCH_H */
 /******************************************************************************/

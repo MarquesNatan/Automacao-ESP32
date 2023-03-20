@@ -1,10 +1,12 @@
 /******************************************************************************/
-#ifndef INTERRUPT_H
-#define INTERRUPT_H
+#ifndef SCENES_H
+#define SCENES_H
 /******************************************************************************/
-void Interrupt_Config(void *params);
-void IRAM_ATTR ISR_HandleAux(void *args);
-void IRAM_ATTR ISR_Handle(void);
+#include "scenes_defs_h"
 /******************************************************************************/
-#endif /* INTERRUPT_H */
+void vTaskScenesHandle( void *pvParameters );
+
+uint8_t ScenesSearch( uint8_t day );
+/******************************************************************************/
+#endif /* SCENES_H */
 /******************************************************************************/

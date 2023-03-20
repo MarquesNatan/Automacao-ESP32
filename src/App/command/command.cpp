@@ -1,24 +1,47 @@
 /******************************************************************************/
-#include <Arduino.h>
-#include <stdio.h>
-#include <stdlib.h>
-
 #include "include/command.h"
-#include "../../src/system/include/system_defs.h"
+#include "include/command_defs.h"
+#include "../../system/include/system_defs.h"
+
+#include "Arduino.h"
+
+#include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
+#include "freertos/task.h"
 /******************************************************************************/
-QueueHandle_t commQueue;
 QueueHandle_t commandQueue;
+/******************************************************************************/
 uint8_t ptrParams[3];
 /******************************************************************************/
 command_packet_t newCommand = {
     .length = 0,
 };
 /******************************************************************************/
-void Command_CreateQueue(uint8_t length, QueueHandle_t *queue)
+void vTaskRunCommand( void *pvParameters )
 {
-    *queue = xQueueCreate(length, sizeof(command_t));
+    uint8_t isEmpty = 0;
+    command_packet_t localCommand;
+
     commandQueue = xQueueCreate(10, sizeof(newCommand));
+    if(commandQueue == NULL)
+    {
+        Serial.printf("Erro durante a criação da fila de comandos.\n");
+    }
+
+    while(1)
+    {
+        if (xQueueReceive(commandQueue, &localCommand, portMAX_DELAY))
+        {
+            if(commandIsValid(&localCommand))
+            {
+                #if COMMAND_DEBUG == true
+                    Serial.printf("Comando sem erros, pode ser processado.\n");
+                #endif /* COMMAND_DEBUG */   
+            }
+        }
+
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
+    }
 }
 /******************************************************************************/
 bool getCommand(uint8_t *data, unsigned int length)

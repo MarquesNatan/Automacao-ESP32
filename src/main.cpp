@@ -3,21 +3,24 @@
 #include "system/include/system.h"
 #include "system/include/system_defs.h"
 #include "App/main/include/main_app.h"
-
-#include "../mqtt/include/mqtt.h"
-#include "../commands/include/command.h"
-#include "../lib/RTC/include/rtc.h"
+#include "../../lib/mqtt/include/mqtt.h"
 
 #include <PubSubClient.h>
-#include "RTClib.h"
+#include "freertos/task.h"
+
+#include "App/main/include/tasks.h"
 /******************************************************************************/
 void setup()
 {
   System_Init(NULL);
+
+  vTasksCreate( NULL );
 }
 /******************************************************************************/
 void loop()
 {
-  main_app(NULL);
+    #if MQTT_ENABLE == true
+      vTaskMqttHandleConnection(NULL);
+    #endif /* MQTT_ENABLE */
 }
 /******************************************************************************/

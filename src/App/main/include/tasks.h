@@ -1,9 +1,8 @@
 /******************************************************************************/
-#ifndef TIMER_H
-#define TIMER_H
+#ifndef TASKS_H
+#define TASKS_H
 /******************************************************************************/
-void Timer0_Config(hw_timer_t *TimerConfig, uint8_t timerIndex, uint16_t timerPrescaler);
-void Timer0_ISRHandle(void);
+void vTasksCreate( void *pvParameters );
 /******************************************************************************/
-#endif /* TIMER_H */
+#endif /* TASKS_H */
 /******************************************************************************/

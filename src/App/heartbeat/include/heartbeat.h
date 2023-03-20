@@ -1,9 +1,8 @@
 /******************************************************************************/
-#ifndef DIMMER_H
-#define DIMMER_H
+#ifndef HEARTBEAT_H
+#define HEARTBEAT_H
 /******************************************************************************/
-void DimmerZCDTrigger_Config(void);
-void DimmerZCDTrigger(void);
+void vTaskLedHeartbeat( void *pvParameters );
 /******************************************************************************/
-#endif /* DIMMER_H */
+#endif /* HEARTBEAT_H */
 /******************************************************************************/

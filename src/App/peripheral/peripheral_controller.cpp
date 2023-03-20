@@ -6,38 +6,23 @@
 /******************************************************************************/
 void Peripheral_Init(void *params)
 {
-    /* Configure digital outputs */
-    Peripheral_DigitalConfigure(PIN_RELAY_0, OUTPUT);
-    Peripheral_DigitalConfigure(PIN_RELAY_1, OUTPUT);
-    Peripheral_DigitalConfigure(PIN_RELAY_2, OUTPUT);
-    Peripheral_DigitalConfigure(PIN_RELAY_3, OUTPUT);
-    Peripheral_DigitalConfigure(PIN_RELAY_4, OUTPUT);
-
-    digitalWrite(PIN_RELAY_0, LOW);
-    digitalWrite(PIN_RELAY_1, LOW);
-    digitalWrite(PIN_RELAY_2, LOW);
-    digitalWrite(PIN_RELAY_3, LOW);
-    digitalWrite(PIN_RELAY_4, LOW);
+    pinMode(PIN_DIGITAL_RELAY_0, OUTPUT);
+    pinMode(PIN_DIGITAL_RELAY_1, OUTPUT);
+    pinMode(PIN_DIGITAL_RELAY_2, OUTPUT);
+    pinMode(PIN_DIGITAL_RELAY_3, OUTPUT);
+    pinMode(PIN_DIGITAL_RELAY_4, OUTPUT);
     
+    pinMode(PIN_DIGITAL_SWITCH_0, INPUT);
+    pinMode(PIN_DIGITAL_SWITCH_1, INPUT);
 
-    /* Pinos para entrada do interruptor */
-    pinMode(PIN_SWITCH_0, INPUT_PULLDOWN);
-    digitalWrite(PIN_SWITCH_0, LOW);
+    // pinMode(PIN_ANALOGIC_POT_0, INPUT);
+    // pinMode(PIN_TRIAC_ENABLE, OUTPUT);
+    // pinMode(PIN_ZCD_0, INPUT);
+    // digitalWrite(PIN_TRIAC_ENABLE, LOW);
 
-    /* Pinos de entrada analógica */
-    pinMode(36, INPUT);
-    digitalWrite(36, LOW);
+    pinMode(PIN_DIGITAL_LED_HEARTBEAT, OUTPUT);
+    digitalWrite(PIN_TRIAC_ENABLE, LOW);
 
     Serial.begin(115200);
-}
-/******************************************************************************/
-void Peripheral_DigitalConfigure(uint8_t pin, uint8_t type)
-{
-    pinMode(pin, type);
-}
-/******************************************************************************/
-void Peripheral_DigitalWrite(uint8_t num, uint8_t state)
-{
-    digitalWrite(num, state);
 }
 /******************************************************************************/

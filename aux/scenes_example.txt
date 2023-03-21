@@ -1,3 +1,8 @@
-seg
-18:30;L;00;00
-18:30;L;00;00
+Exemplo de como enviar as cenas de automação:
+
+    req:
+        - Dia da semana: (segunda ->  1: terça -> 2 ... dom -> 6 )
+        - Horário:       (18:20:30)
+        - comando:       (<L:00:01>)
+
+        1;18:10:30;<L:00:01>

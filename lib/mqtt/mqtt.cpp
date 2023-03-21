@@ -5,6 +5,7 @@
 #include "../../src/common/include/board.h"
 
 #include "../../src/App/command/include/command.h"
+#include "../../src/App/scenes/include/scenes.h"
 
 #include <PubSubClient.h>
 #include <WiFi.h>
@@ -83,11 +84,15 @@ void MQTT_tryConnect(void)
                 Serial.println("\n");
                 Serial.printf(PASTE3_SIMPLE(BOARD_ID, BOARD_BASE_TOPIC, BOARD_TOPIC_DIGITAL));
                 Serial.println("\n");
+                Serial.printf(PASTE3_SIMPLE(BOARD_ID, BOARD_BASE_TOPIC, BOARD_TIPOC_SCENES));
+                Serial.println("\n");
             #endif  /* MQTT_DEBUG */
 
             MQTT.subscribe(PASTE3_SIMPLE(BOARD_ID, BOARD_BASE_TOPIC, BOARD_TOPIC_DIGITAL));
             MQTT.subscribe(PASTE3_SIMPLE(BOARD_ID, BOARD_BASE_TOPIC, BOARD_TOPIC_ANALOGIC));
             MQTT.subscribe(PASTE3_SIMPLE(BOARD_ID, BOARD_BASE_TOPIC, BOARD_TOPIC_SENSOR));
+            MQTT.subscribe(PASTE3_SIMPLE(BOARD_ID, BOARD_BASE_TOPIC, BOARD_TIPOC_SCENES));
+
         }
         else
         {
@@ -113,29 +118,46 @@ void MQTT_DataReceiver(char *topic, uint8_t *data, unsigned int length)
 {
     command_packet_t command; 
     uint8_t i = 0;
-    if(getCommand(data, length))
+
+    /* Tópico recebido é para execução de comandos */
+    if(strcasestr(topic, "digital") || strcasestr(topic, "analogico"))
     {
-        if(newCommand.status == COMMAND_VALIDATION_WAIT)
-        {
-            xQueueSendToBack(commandQueue, &newCommand, portMAX_DELAY);
-            
+        if(getCommand(data, length))
+         {
+            if(newCommand.status == COMMAND_VALIDATION_WAIT)
+            {
+                xQueueSendToBack(commandQueue, &newCommand, portMAX_DELAY);
+                
+                #if COMMAND_DEBUG == true
+                    Serial.printf("Comando inserido na fila\n");
+                #endif /* COMMAND_DEBUG */
+            }
+
             #if COMMAND_DEBUG == true
-                Serial.printf("Comando inserido na fila\n");
+                else 
+                {
+                    Serial.printf("\nCommando não inserido na fila.\n");
+                }
             #endif /* COMMAND_DEBUG */
         }
+
         #if COMMAND_DEBUG == true
             else 
             {
-                Serial.printf("\nCommando não inserido na fila.\n");
+                Serial.printf("Erro durante e copia do comando.");
             }
         #endif /* COMMAND_DEBUG */
     }
-    #if COMMAND_DEBUG == true
-        else 
+    else 
+    {
+        /* É para agendar uma cena  */
+        if(RegisterNewScene(data, length))
         {
-            Serial.printf("Erro durante e copia do comando.");
+            #if SCENES_DEBUG == false
+                Serial.printf("Tarefa registrada com sucesso.\n");
+            #endif /* SCENES_DEBUG */
         }
-    #endif /* COMMAND_DEBUG */
+    }
 }
 /******************************************************************************/
 bool MQTT_Publish(const char *message, const char *topic)

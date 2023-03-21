@@ -32,5 +32,8 @@ typedef struct
     command_packet_t scenesCommands[SCENES_MAX_COMMANDS];
 }scene_t;
 /******************************************************************************/
+bool RegisterNewScene(uint8_t sceneParams[], unsigned int length);
+uint8_t CharToByte(uint8_t buffer[], uint8_t offset, uint8_t length);
+/******************************************************************************/
 #endif /* SCENES_DEFS_H */
 /******************************************************************************/

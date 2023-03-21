@@ -26,6 +26,7 @@
     #define ISR_DEBUG                   true
     #define DIMMER_DEBUG                true
     #define DEBUG_FILE_SYSTEM           true
+    #define SCENES_DEBUG                true
 #else
     #if defined WIFI_ENABLE && WIFI_ENABLE == true
         #define WIFI_DEBUG                  façse

@@ -8,6 +8,8 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
 #include "freertos/task.h"
+
+#include <stdlib.h>
 /******************************************************************************/
 QueueHandle_t commandQueue;
 /******************************************************************************/
@@ -146,11 +148,17 @@ int8_t paramsIsValid(uint8_t params[])
     if (!containsThisValue(params[0], (uint8_t *)actions, 4))
     {
         qntError = qntError + 1;
+        #if COMMAND_DEBUG == true
+            Serial.printf("Erro na action.\n");
+        #endif /* COMMAND_DEBUG */
     }
 
     if (!containsThisValue(params[1], (uint8_t *)outputs, 5))
     {
         qntError = qntError + 1;
+        #if COMMAND_DEBUG == true
+            Serial.printf("Erro no output.\n");
+        #endif /* COMMAND_DEBUG */
     }
 
     return qntError;

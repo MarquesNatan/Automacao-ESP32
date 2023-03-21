@@ -1,14 +1,18 @@
 /******************************************************************************/
 #include "include/scenes.h"
 #include "include/scenes_defs_h"
+#include "../../lib/file/include/file.h"
+#include "../command/include/command.h"
 
 #include "Arduino.h"
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
-#include "../../lib/file/include/file.h"
 #include "LittleFS.h"
+
+#include <stdlib.h>
+#include <stdint.h>
 /******************************************************************************/
 uint8_t ScenesSearch( uint8_t day )
 {
@@ -32,12 +36,35 @@ uint8_t ScenesSearch( uint8_t day )
     return 0;
 }
 /******************************************************************************/
-void RegisterNewScene(command_packet_t scenceCommand, scene_time_t sceneTriggerTime, scene_day day)
+bool IRAM_ATTR RegisterNewScene(uint8_t sceneParams[], unsigned int length)
 {
-    if(day >= 0 && day <= 6)
+    uint8_t params[] = {CharToByte(sceneParams, 8, 2), CharToByte(sceneParams, 10, 2)};
+
+    if(!paramsIsValid(params))
     {
-        
+        Serial.printf("Todos os parametros são validos.\n");
     }
+    else 
+    {
+        Serial.printf("Parametros invalidos.\n");
+    }
+
+    return true;
+}
+/******************************************************************************/
+uint8_t CharToByte(uint8_t buffer[], uint8_t offset, uint8_t length)
+{
+    char temp[length];
+    uint8_t value;
+
+    for(int i = 0; i < length; i++)
+    {
+        temp[i] = (char)buffer[offset + i];
+    }
+
+    value = (uint8_t) strtol(temp, NULL, 16);
+
+    return value;
 }
 /******************************************************************************/
 void vTaskScenesHandle( void *pvParameters )

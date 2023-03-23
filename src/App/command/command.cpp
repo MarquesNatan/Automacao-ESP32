@@ -74,6 +74,9 @@ bool getCommand(uint8_t *data, unsigned int length)
 bool CommandGetParams(command_packet_t *command)
 {
     uint8_t len = sizeof(command->data) / sizeof(command->data[0]);
+
+    Serial.printf("len: %i\n", len);
+
     uint8_t i = 0;
     uint8_t paramsCount = 0;
     char temp[2];

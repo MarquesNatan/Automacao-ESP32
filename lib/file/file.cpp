@@ -2,6 +2,8 @@
 #include "include/file.h"
 #include "../../src/system/include/system_defs.h"
 
+#include "Arduino.h"
+
 #include "FS.h"
 #include "LittleFS.h"
 /******************************************************************************/
@@ -151,6 +153,40 @@ void FileSystemWriteFile( fs::FS &fs, const char * path, const char * message ){
     file.close();
 }
 /******************************************************************************/
+void appendFile( fs::FS &fs, const char * path, const char * message )
+{
+
+    #if DEBUG_FILE_SYSTEM == true
+        Serial.printf("Appending to file: %s\r\n", path);
+    #endif /* DEBUG_FILE_SYSTEM */
+
+    File file = fs.open(path, FILE_APPEND);
+
+    if(!file)
+    {
+        #if DEBUG_FILE_SYSTEM == true
+            Serial.println("- failed to open file for appending");
+        #endif /* DEBUG_FILE_SYSTEM */
+        return;
+    }
+
+    if(file.print(message))
+    {
+        #if DEBUG_FILE_SYSTEM == true
+            Serial.println("- message appended");
+        #endif /* DEBUG_FILE_SYSTEM */
+
+    }
+    else
+    {
+        #if DEBUG_FILE_SYSTEM == true
+            Serial.println("- append failed");
+        #endif /* DEBUG_FILE_SYSTEM */
+    }
+
+    file.close();
+}
+/******************************************************************************/
 void FileSystemReadFile( fs::FS &fs, const char * path )
 {
     #if DEBUG_FILE_SYSTEM == true
@@ -199,5 +235,48 @@ void FileSystemDeleteFile( fs::FS &fs, const char * path )
             Serial.println("- delete failed");
         #endif /* DEBUG_FILE_SYSTEM */
     }
+}
+/******************************************************************************/
+void FileSystemFindText( fs::FS &fs, const char * path, const char *textToFind )
+{
+
+}
+/******************************************************************************/
+String FileSystemFindLastWrite( fs::FS &fs, const char * path, uint8_t buffer[], uint8_t offset )
+{
+    File file = fs.open(path, FILE_READ);
+
+    if(!file)
+    {
+        #if DEBUG_FILE_SYSTEM == true
+            Serial.println("Erro ao tentar abrir arquivo");
+        #endif /* DEBUG_FILE_SYSTEM */
+
+        return "";
+    }
+
+    if(file.seek((-1 * offset), SeekEnd))
+    {
+        while(file.available())
+        {
+            #if DEBUG_FILE_SYSTEM == true
+                // Serial.write(file.read());
+            #endif /* DEBUG_FILE_SYSTEM */
+
+            file.read(buffer, offset);
+
+        }
+
+        return "";
+    }
+    else 
+    {
+        #if DEBUG_FILE_SYSTEM == true
+            Serial.println("Erro na função file.Seek()");
+        #endif /* DEBUG_FILE_SYSTEM */
+    }
+
+    file.close();
+    return "";
 }
 /******************************************************************************/

@@ -15,8 +15,9 @@ typedef enum
     QUI = 0X03, 
     SEX = 0X04, 
     SAB = 0X05,
-    DOM = 0X05
-}scene_day;
+    DOM = 0X06,
+    ALL_DAYS = 0x07
+}SCENE_DAY_ENUM;
 /******************************************************************************/
 typedef struct 
 {
@@ -27,13 +28,14 @@ typedef struct
 /******************************************************************************/
 typedef struct
 {
-    scene_day sceneDay;
+    SCENE_DAY_ENUM sceneDay;
     scene_time_t sceneTime;
-    command_packet_t scenesCommands[SCENES_MAX_COMMANDS];
+    command_packet_t sceneCommand;
 }scene_t;
 /******************************************************************************/
 bool RegisterNewScene(uint8_t sceneParams[], unsigned int length);
 uint8_t CharToByte(uint8_t buffer[], uint8_t offset, uint8_t length);
+void GetCommandScene(command_packet_t *command, uint8_t params[]);
 /******************************************************************************/
 #endif /* SCENES_DEFS_H */
 /******************************************************************************/

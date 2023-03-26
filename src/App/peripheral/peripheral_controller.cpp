@@ -21,7 +21,8 @@ void Peripheral_Init(void *params)
     // digitalWrite(PIN_TRIAC_ENABLE, LOW);
 
     pinMode(PIN_DIGITAL_LED_HEARTBEAT, OUTPUT);
-    digitalWrite(PIN_TRIAC_ENABLE, LOW);
+
+    pinMode(PIN_DIGITAL_SQW_RTC, INPUT_PULLUP);
 
     Serial.begin(115200);
 }

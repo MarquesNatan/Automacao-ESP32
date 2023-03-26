@@ -15,6 +15,7 @@ uint8_t RTC_GetDay(void);
 uint8_t RTC_GetHour(void);
 uint8_t RTC_GetMinute(void);
 uint8_t RTC_GetSecond(void);
+void ISR_RTCAlarm(void);
 /******************************************************************************/
 #endif /* RTC_H */
 /******************************************************************************/

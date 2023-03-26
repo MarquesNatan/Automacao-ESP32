@@ -17,11 +17,17 @@ bool FileSystemStart( void )
         
         return false;
     }
+    #if DEBUG_FILE_SYSTEM == true
+        else 
+        {
+            Serial.println("Sistema de Arquivos iniciado com sucesso.\n");
+        }
+    #endif /* DEBUG_FILE_SYSTEM */    
 
     return true;
 }
 /******************************************************************************/
-void FileSystemCreateDir( fs::FS &fs, const char *path )
+bool FileSystemCreateDir( fs::FS &fs, const char *path )
 {
     #if DEBUG_FILE_SYSTEM == true
         Serial.printf("Creating Dir: %s\n", path);
@@ -34,14 +40,20 @@ void FileSystemCreateDir( fs::FS &fs, const char *path )
             #if DEBUG_FILE_SYSTEM == true
                 Serial.println("Diretório criado com sucesso.\n");
             #endif /* DEBUG_FILE_SYSTEM */
+
+            return true;
         }
         else
         {
             #if DEBUG_FILE_SYSTEM == true
                 Serial.println("Erro ao criar diretório.\n");
             #endif /* DEBUG_FILE_SYSTEM */
+
+            return false;
         }
     }
+
+    return false;
 
 }
 /******************************************************************************/
@@ -153,7 +165,7 @@ void FileSystemWriteFile( fs::FS &fs, const char * path, const char * message ){
     file.close();
 }
 /******************************************************************************/
-void appendFile( fs::FS &fs, const char * path, const char * message )
+void FileSystemAppendFile( fs::FS &fs, const char * path, const char * message )
 {
 
     #if DEBUG_FILE_SYSTEM == true
@@ -237,11 +249,6 @@ void FileSystemDeleteFile( fs::FS &fs, const char * path )
     }
 }
 /******************************************************************************/
-void FileSystemFindText( fs::FS &fs, const char * path, const char *textToFind )
-{
-
-}
-/******************************************************************************/
 String FileSystemFindLastWrite( fs::FS &fs, const char * path, uint8_t buffer[], uint8_t offset )
 {
     File file = fs.open(path, FILE_READ);
@@ -278,5 +285,62 @@ String FileSystemFindLastWrite( fs::FS &fs, const char * path, uint8_t buffer[],
 
     file.close();
     return "";
+}
+/******************************************************************************/
+bool FileSystemFileExists( fs::FS &fs, const char * path )
+{
+    if(fs.exists(path))
+    {
+        return true;
+    }
+    
+    return false;
+}
+/******************************************************************************/
+bool FileSystemCreateFile( fs::FS &fs, const char * path )
+{
+    File file = fs.open(path, "w+");
+
+    if(!file)
+    {
+        #if DEBUG_FILE_SYSTEM == true
+            Serial.println("O arquivo não existe ou o caminho está errado.\n");
+        #endif /* DEBUG_FILE_SYSTEM */    
+        return false;
+    }
+
+    return true;
+}
+/******************************************************************************/
+uint8_t FileSystemGetInterval(fs::FS &fs, const char * path, uint8_t lineStart, uint8_t lineEnd, uint8_t lineSize, uint8_t buffer[])
+{
+
+    uint8_t lines = 0;
+
+    File file; 
+    file = fs.open(path, "r");
+
+    if(!path)
+    {
+        #if DEBUG_FILE_SYSTEM == true
+            Serial.printf("Erro no ao tentar abrir o arquivo. %s\n", path);
+        #endif /* DEBUG_FILE_SYSTEM */   
+    }
+
+   if(lineSize != 0)
+   {
+        /* Ponteiro para a linha especificada */
+        file.seek(lineStart * lineSize);
+        lines = file.read(buffer, (lineEnd - lineStart) * lineSize);
+   }
+   else 
+   {
+
+   }
+
+
+   file.close();
+
+   return lines;
 }
 /******************************************************************************/

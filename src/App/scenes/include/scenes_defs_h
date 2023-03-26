@@ -28,14 +28,18 @@ typedef struct
 /******************************************************************************/
 typedef struct
 {
-    SCENE_DAY_ENUM sceneDay;
-    scene_time_t sceneTime;
-    command_packet_t sceneCommand;
-}scene_t;
+    SCENE_DAY_ENUM diaCena;
+    scene_time_t horarioCena;
+    command_packet_t comandoCena;
+}cena_t;
 /******************************************************************************/
 bool RegisterNewScene(uint8_t sceneParams[], unsigned int length);
 uint8_t CharToByte(uint8_t buffer[], uint8_t offset, uint8_t length);
 void GetCommandScene(command_packet_t *command, uint8_t params[]);
+
+void IniciarCenas( void );
+void IniciaEstruturaNovaCena(cena_t *novaCena, uint8_t bytesRecebidos[]);
+void BuscarParametrosNovaCena(cena_t *novaCena, uint8_t bytesRecebidos[]);
 /******************************************************************************/
 #endif /* SCENES_DEFS_H */
 /******************************************************************************/

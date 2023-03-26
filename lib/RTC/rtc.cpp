@@ -1,11 +1,17 @@
 /******************************************************************************/
+#include "Arduino.h"
+
 #include "include/rtc.h"
 #include "Wire.h"
 #include "RTClib.h"
 
-#include "../../../src/system/include/system_defs.h"
+#include "../../src/system/include/system.h"
+#include "../../src/common/include/board_peripheral.h"
+#include "freertos/semphr.h"
+
 /******************************************************************************/
 RTC_DS3231 rtc;
+xSemaphoreHandle xRTCSemaphore;
 /******************************************************************************/
 void RTC_Init(void* params)
 {
@@ -16,6 +22,20 @@ void RTC_Init(void* params)
         #endif /* RTC_DEBUG */
         while(true);
     }
+
+    #if RTC_USE_ALARM == true
+        /* Disable all alarms */
+        rtc.disableAlarm(1);
+        rtc.disableAlarm(2);
+        rtc.clearAlarm(1);
+        rtc.clearAlarm(2);
+
+        /* Alarm pin in interrup mode */
+        rtc.writeSqwPinMode(DS3231_OFF);
+
+        /* Interrupt Service Routine */
+        attachInterrupt(digitalPinToInterrupt(PIN_DIGITAL_SQW_RTC), ISR_RTCAlarm, FALLING);
+    #endif /* RTC_USE_ALARM */
 
     rtc.adjust(DateTime(__DATE__, __TIME__));
 }
@@ -54,6 +74,7 @@ uint8_t RTC_GetDay(void)
         Serial.printf("Dia: %i\n", now.day());
     #endif /* RTC_DEBUG */
 
+
     return now.day();
 }
 /******************************************************************************/
@@ -88,5 +109,38 @@ uint8_t RTC_GetSecond(void)
     #endif /* RTC_DEBUG */
 
     return now.second();
+}
+/******************************************************************************/
+uint8_t RTC_GetWeekDay(void)
+{
+    DateTime now = rtc.now();
+
+    #if RTC_DEBUG == true
+        Serial.printf("Segundo: %i\n", now.dayOfTheWeek());
+    #endif /* RTC_DEBUG */
+
+    return now.dayOfTheWeek();
+}
+/******************************************************************************/
+void RTC_SetAlarm(DateTime datetime, uint8_t mode)
+{
+
+}
+/******************************************************************************/
+void ISR_RTCAlarm(void)
+{
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+
+    /* Quando existir um alarme, libera o semaforo para a task que está esperando */
+    //if(rtc.alarmFired(RTC_USE_ALARM))
+    //{
+        xSemaphoreGiveFromISR(xRTCSemaphore, &xHigherPriorityTaskWoken);
+
+        if(xHigherPriorityTaskWoken == pdTRUE)
+        {
+            portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
+        }
+    //}
+
 }
 /******************************************************************************/

@@ -11,6 +11,7 @@
 #define MQTT_ENABLE                     true
 
 #define TIMER_INDEX                     TIMER_INDEX_1
+#define RTC_USE_ALARM                   1
 
 #if defined SYSTEM_BUILD_TYPE && SYSTEM_BUILD_TYPE == DEBUG
     #if defined WIFI_ENABLE && WIFI_ENABLE == true
@@ -22,7 +23,7 @@
     #endif /* MQTT_ENABLE */ 
 
     #define COMMAND_DEBUG               true
-    #define RTC_DEBUG                   true
+    #define RTC_DEBUG                   false
     #define ISR_DEBUG                   true
     #define DIMMER_DEBUG                true
     #define DEBUG_FILE_SYSTEM           true

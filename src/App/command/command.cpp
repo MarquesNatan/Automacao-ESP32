@@ -75,8 +75,6 @@ bool CommandGetParams(command_packet_t *command)
 {
     uint8_t len = sizeof(command->data) / sizeof(command->data[0]);
 
-    Serial.printf("len: %i\n", len);
-
     uint8_t i = 0;
     uint8_t paramsCount = 0;
     char temp[2];
@@ -147,6 +145,10 @@ int8_t paramsIsValid(uint8_t params[])
 
     uint8_t qntError = 0;
     uint8_t i = 0;
+
+    #if COMMAND_DEBUG == false
+        Serial.printf("Parametros: [%c] [%i]\n", params[0], params[1]);
+    #endif /* COMMAND_DEBUG */
 
     if (!containsThisValue(params[0], (uint8_t *)actions, 4))
     {

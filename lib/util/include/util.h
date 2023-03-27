@@ -1,13 +1,10 @@
 /******************************************************************************/
-#ifndef SCENES_H
-#define SCENES_H
+#ifndef UTIL_H
+#define UTIL_H
 /******************************************************************************/
-#include "scenes_defs_h"
+#include "stdint.h"
 /******************************************************************************/
-void vTaskScenesHandle( void *pvParameters );
-uint8_t BuscarCenas( uint8_t dia );
-bool CopiarComando(uint8_t src[], uint8_t dest[], uint8_t offset, uint8_t length);
-void ImprimeCena_Debug(cena_t cena);
+uint8_t CharToByte(uint8_t buffer[], uint8_t offset, uint8_t length);
 /******************************************************************************/
-#endif /* SCENES_H */
+#endif /* UTIL_H */
 /******************************************************************************/

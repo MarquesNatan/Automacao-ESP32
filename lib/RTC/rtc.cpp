@@ -37,7 +37,7 @@ void RTC_Init(void* params)
         attachInterrupt(digitalPinToInterrupt(PIN_DIGITAL_SQW_RTC), ISR_RTCAlarm, FALLING);
     #endif /* RTC_USE_ALARM */
 
-    rtc.adjust(DateTime(__DATE__, __TIME__));
+    rtc.adjust(DateTime(2023, 3, 26, 16, 0, 0));
 }
 /******************************************************************************/
 DateTime RTC_GetTime(void *params)
@@ -132,15 +132,11 @@ void ISR_RTCAlarm(void)
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 
     /* Quando existir um alarme, libera o semaforo para a task que está esperando */
-    //if(rtc.alarmFired(RTC_USE_ALARM))
-    //{
-        xSemaphoreGiveFromISR(xRTCSemaphore, &xHigherPriorityTaskWoken);
-
-        if(xHigherPriorityTaskWoken == pdTRUE)
-        {
-            portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
-        }
-    //}
+    xSemaphoreGiveFromISR(xRTCSemaphore, &xHigherPriorityTaskWoken);
+    if(xHigherPriorityTaskWoken == pdTRUE)
+    {
+        portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
+    }
 
 }
 /******************************************************************************/

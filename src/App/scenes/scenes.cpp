@@ -9,6 +9,7 @@
 
 #include "../../lib/file/include/file.h"
 #include "../../lib/RTC/include/rtc.h"
+#include "../../lib/util/include/util.h"
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -21,27 +22,74 @@
 #include <stdint.h>
 /******************************************************************************/
 QueueHandle_t xCenasQueue;
+/******************************************************************************/
+uint8_t ultimoDia = 0xFF;
+/******************************************************************************/
 extern xSemaphoreHandle xRTCSemaphore;
 extern RTC_DS3231 rtc;
 /******************************************************************************/
+bool CopiarComando(uint8_t src[], uint8_t dest[], uint8_t offset, uint8_t length)
+{
+    int i = 0;
+    int temp = 0;
+
+    for(i = 0; i < length; i++)
+    {
+        dest[i] = src[offset + i];
+        temp = temp + 1;
+    }
+
+    if(temp == (length - 1))
+    {
+        return true;
+    }
+
+    return true;
+}
+/******************************************************************************/
 uint8_t BuscarCenas( uint8_t dia )
 {
-    uint8_t buffer[12 * 10];
-    uint8_t bytes = FileSystemGetInterval(LittleFS, "/cenas/cenas.txt", 1, 5, 13, buffer);
+    uint8_t buffer[15 * 10];
+    uint8_t bufferAux[15];
+    uint8_t aux = 0;
 
-    #if SCENES_DEBUG == true
-        Serial.printf("Dia de cadastro das cenas: %i\n", dia);
-        Serial.printf("Quanditdade de bytes lidos: %i\n", bytes);
-        Serial.printf("Quanditdade de cenas registradas: %i\n", (int)(bytes/12));
+    uint8_t offset = dia * 15;
+    uint8_t bytes = FileSystemGetInterval(LittleFS, "/cenas/cenas.txt", offset, 10, 15, buffer);
+
+    uint8_t temp = 0;
+
+    #if SCENES_DEBUG == false
+        Serial.printf("Dados das cenas: \n");
         for(int i = 0; i < bytes; i++)
         {
             Serial.printf("%c", buffer[i]);
         }
 
-        Serial.printf("\n");
     #endif /* SCENES_DEBUG */
 
+    if(bytes != (10 - offset) * 15)
+    {
+        Serial.printf("Erro, quantidade de dados lidos não é valida.\n");
 
+        return 0;
+    }
+
+    for(int i = 0; i < 10; i++)
+    {
+        CopiarComando(buffer, bufferAux, temp, 15);
+
+        aux = CharToByte(bufferAux, 0, 2);
+
+        if(aux != dia)
+        {
+            return 1;
+        }
+
+
+        RegisterNewScene(bufferAux, 0);
+
+        temp = temp + 15;
+    }
     
     return 0;
 }
@@ -53,7 +101,7 @@ void IniciarCenas( void )
     if(FileSystemStart())
     {
         #if SCENES_DEBUG == true
-            Serial.printf("Sistema de arquivos iniciado com sucesso.\n");
+            Serial.printf("\nSistema de arquivos iniciado com sucesso.\n");
         #endif /* SCENES_DEBUG */
 
         if(FileSystemFileExists(LittleFS, "/cenas/cenas.txt"))
@@ -62,17 +110,17 @@ void IniciarCenas( void )
                 Serial.printf("Arquivo de Registro de cenas encontrado.\n");
             #endif /* SCENES_DEBUG */
 
-            FileSystemWriteFile(LittleFS, "/cenas/cenas.txt", "0010204D0000\n");
+            FileSystemWriteFile(LittleFS, "/cenas/cenas.txt", "001001004C0000\n");
+            FileSystemAppendFile(LittleFS, "/cenas/cenas.txt","001002014C0000\n");
+            FileSystemAppendFile(LittleFS, "/cenas/cenas.txt","011020024C0403\n");
+            FileSystemAppendFile(LittleFS, "/cenas/cenas.txt","010102034C0D04\n");
+            FileSystemAppendFile(LittleFS, "/cenas/cenas.txt","011020044C0F05\n");
+            FileSystemAppendFile(LittleFS, "/cenas/cenas.txt","FFFFFFFF4D0000\n");
+            FileSystemAppendFile(LittleFS, "/cenas/cenas.txt","FFFFFFFF4D0000\n");
+            FileSystemAppendFile(LittleFS, "/cenas/cenas.txt","FFFFFFFF4D0000\n");
+            FileSystemAppendFile(LittleFS, "/cenas/cenas.txt","FFFFFFFF4D0000\n");
+            FileSystemAppendFile(LittleFS, "/cenas/cenas.txt","FFFFFFFF4D0000\n");
 
-            FileSystemAppendFile(LittleFS, "/cenas/cenas.txt","0010204D0001\n");
-            FileSystemAppendFile(LittleFS, "/cenas/cenas.txt","0010204D0002\n");
-            FileSystemAppendFile(LittleFS, "/cenas/cenas.txt","0010204D0003\n");
-            FileSystemAppendFile(LittleFS, "/cenas/cenas.txt","0010204D0004\n");
-            FileSystemAppendFile(LittleFS, "/cenas/cenas.txt","0010204D0005\n");
-            FileSystemAppendFile(LittleFS, "/cenas/cenas.txt","0010204D0006\n");
-            FileSystemAppendFile(LittleFS, "/cenas/cenas.txt","0010204D0007\n");
-            FileSystemAppendFile(LittleFS, "/cenas/cenas.txt","0010204D0008\n");
-            FileSystemAppendFile(LittleFS, "/cenas/cenas.txt","0010204D0009\n");
         }
         else 
         {
@@ -108,50 +156,44 @@ bool IRAM_ATTR RegisterNewScene(uint8_t sceneParams[], unsigned int length)
     
     IniciaEstruturaNovaCena(&novaCena, sceneParams);
 
-    if(novaCena.diaCena >= SEG && novaCena.diaCena <= DOM)
+    for(int i = 0; i < 9; i++)
+    {
+        Serial.printf("%c", novaCena.comandoCena.data[i]);
+    }
+
+    Serial.println();
+
+     if(novaCena.diaCena >= SEG && novaCena.diaCena <= DOM)
     {
         if(commandIsValid(&novaCena.comandoCena))
         {
-            if(sceneParams[0] == 1)
+            if(xQueueSendToBack(xCenasQueue, &novaCena, 0) == pdTRUE)
             {
-                /* Insere o comando no arquivo */
-                FileSystemAppendFile(LittleFS, "/cenas/cenas.txt", (const char *)sceneParams);
+                #if SCENES_DEBUG == true
+                    Serial.printf("A cena adicionada a biblioteca.\n");
+                #endif /* SCENES_DEBUG */
             }
-            else
-            {
-                FileSystemReadFile(LittleFS, "/cenas/cenas.txt");
-            }
+            
         }
         else 
         {
-            Serial.printf("O comando inválido.\n");
+            Serial.printf("A cena inválida.\n");
         }
     }
-
-
-    return true;
-}
-/******************************************************************************/
-uint8_t CharToByte(uint8_t buffer[], uint8_t offset, uint8_t length)
-{
-    char temp[length];
-    uint8_t value;
-
-    for(int i = 0; i < length; i++)
+    else
     {
-        temp[i] = (char)buffer[offset + i];
+        Serial.printf("Erro na data da cena.\n");
     }
 
-    value = (uint8_t) strtol(temp, NULL, 16);
-
-    return value;
+    return true;
 }
 /******************************************************************************/
 void IniciaEstruturaNovaCena(cena_t *novaCena, uint8_t bytesRecebidos[])
 {
     novaCena->diaCena = (SCENE_DAY_ENUM)CharToByte(bytesRecebidos, 0, 2);
     novaCena->horarioCena.hour = CharToByte(bytesRecebidos, 2, 2);
-    novaCena->horarioCena.minute = CharToByte(bytesRecebidos, 4, 3);
+    novaCena->horarioCena.minute = CharToByte(bytesRecebidos, 4, 2);
+    novaCena->horarioCena.secound = CharToByte(bytesRecebidos, 6, 2);
 
     /* Busca o comando da cena */
     BuscarParametrosNovaCena(novaCena, bytesRecebidos);
@@ -161,34 +203,34 @@ void IniciaEstruturaNovaCena(cena_t *novaCena, uint8_t bytesRecebidos[])
 /******************************************************************************/
 void BuscarParametrosNovaCena(cena_t *novaCena, uint8_t bytesRecebidos[])
 {
+    // 001020004C0000 
     novaCena->comandoCena.data[0] = (uint8_t)COMMAND_SOF;
     novaCena->comandoCena.data[8] = (uint8_t)COMMAND_EOF;
 
     /* offset dos dados da cena */
-    const uint8_t offset = 6;
+    const uint8_t offset = 8;
 
-    novaCena->comandoCena.data[1] = CharToByte(bytesRecebidos, 6, 2);
-    Serial.printf("%c", novaCena->comandoCena.data[1]);
+    novaCena->comandoCena.data[1] = CharToByte(bytesRecebidos, 8, 2);
 
     novaCena->comandoCena.data[2] = (uint8_t)COMMAND_END_PARAM;
 
-    novaCena->comandoCena.data[3] = bytesRecebidos[8];
-    novaCena->comandoCena.data[4] = bytesRecebidos[9];
+    novaCena->comandoCena.data[3] = bytesRecebidos[10];
+    novaCena->comandoCena.data[4] = bytesRecebidos[11];
 
     novaCena->comandoCena.data[5] = (uint8_t)COMMAND_END_PARAM;
 
-    novaCena->comandoCena.data[6] = bytesRecebidos[10];
-    novaCena->comandoCena.data[7] = bytesRecebidos[11];
-
+    novaCena->comandoCena.data[6] = bytesRecebidos[12];
+    novaCena->comandoCena.data[7] = bytesRecebidos[13];
 }
 /******************************************************************************/
 void vTaskScenesHandle( void *pvParameters )
 {
     xCenasQueue = xQueueCreate(10, sizeof(cena_t));
-    DateTime dataHoraAtual;
-
-    DateTime now = rtc.now();
-    char buff[] = "Alarm triggered at hh:mm:ss DDD, DD MMM YYYY\n";
+    cena_t cenaAtual;
+    uint8_t diaAtual;
+    DateTime now;
+    
+    now = rtc.now();
 
     if(!xCenasQueue)
     {
@@ -205,30 +247,42 @@ void vTaskScenesHandle( void *pvParameters )
                 Serial.printf("Erro ao criar xRTCSemaphore.\n");
             #endif /* SCENES_DEBUG */
         }
-
-        rtc.setAlarm1(rtc.now() + TimeSpan(0, 0, 0, 10), DS3231_A1_Second);
-        Serial.printf(now.toString(buff));
     }
 
     IniciarCenas();
 
     for(;;)
     {
-        // BuscarCenas(1);
-        if(xSemaphoreTake( xRTCSemaphore, portMAX_DELAY) == pdTRUE)
+
+        diaAtual = now.dayOfTheWeek();
+        if(ultimoDia != diaAtual)
         {
-            digitalWrite(0, !digitalRead(0));
+            BuscarCenas(diaAtual);
 
-            rtc.disableAlarm(1);
-            rtc.clearAlarm(1);
-            rtc.setAlarm1(rtc.now() + TimeSpan(0, 0, 0, 1), DS3231_A1_Second);
-
-            now = rtc.now();
-            Serial.printf(now.toString(buff));
+            ultimoDia = diaAtual;
         }
 
+        /* Se existir algum comando na fila de execução */
+        if(xQueueReceive(xCenasQueue, &cenaAtual, 0) == pdTRUE)
+        {
+            rtc.setAlarm1(DateTime(2023, 3, 26, 16, cenaAtual.horarioCena.minute, 
+                        1), DS3231_A1_Minute);
 
-        vTaskDelay(1000);
+            /* rtc.setAlarm1(DateTime(2023, 3, 26, cenaAtual.horarioCena.hour, cenaAtual.horarioCena.minute, 
+            cenaAtual.horarioCena.secound), DS3231_A1_Date);*/
+            Serial.printf("Hora:%i Minuto:%i Segundo: %i\n", cenaAtual.horarioCena.hour, cenaAtual.horarioCena.minute, cenaAtual.horarioCena.secound);
+
+            /* Espera o alarme liberar o semaforo */
+            if(xSemaphoreTake(xRTCSemaphore, portMAX_DELAY) == pdTRUE)
+            {
+                digitalWrite(0, !digitalRead(0));
+
+                rtc.disableAlarm(1);
+                rtc.clearAlarm(1);
+            }
+        }
+        
+        vTaskDelay(250);
     }
 }
 /******************************************************************************/

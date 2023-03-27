@@ -11,43 +11,43 @@ bool FileSystemStart( void )
 {
     if(!LittleFS.begin(true))
     {
-        #if DEBUG_FILE_SYSTEM == true
+        #if FILE_SYSTEM_DEBUG == true
             Serial.println("Erro ao montar sistema de arquivos.\n");
-        #endif /* DEBUG_FILE_SYSTEM */    
+        #endif /* FILE_SYSTEM_DEBUG */    
         
         return false;
     }
-    #if DEBUG_FILE_SYSTEM == true
+    #if FILE_SYSTEM_DEBUG == true
         else 
         {
             Serial.println("Sistema de Arquivos iniciado com sucesso.\n");
         }
-    #endif /* DEBUG_FILE_SYSTEM */    
+    #endif /* FILE_SYSTEM_DEBUG */    
 
     return true;
 }
 /******************************************************************************/
 bool FileSystemCreateDir( fs::FS &fs, const char *path )
 {
-    #if DEBUG_FILE_SYSTEM == true
+    #if FILE_SYSTEM_DEBUG == true
         Serial.printf("Creating Dir: %s\n", path);
-    #endif /* DEBUG_FILE_SYSTEM */
+    #endif /* FILE_SYSTEM_DEBUG */
 
     if(path != NULL)
     {
         if(LittleFS.mkdir(path))
         {
-            #if DEBUG_FILE_SYSTEM == true
+            #if FILE_SYSTEM_DEBUG == true
                 Serial.println("Diretório criado com sucesso.\n");
-            #endif /* DEBUG_FILE_SYSTEM */
+            #endif /* FILE_SYSTEM_DEBUG */
 
             return true;
         }
         else
         {
-            #if DEBUG_FILE_SYSTEM == true
+            #if FILE_SYSTEM_DEBUG == true
                 Serial.println("Erro ao criar diretório.\n");
-            #endif /* DEBUG_FILE_SYSTEM */
+            #endif /* FILE_SYSTEM_DEBUG */
 
             return false;
         }
@@ -63,18 +63,18 @@ void FileSystemListDir(fs::FS &fs, const char * dirname, uint8_t levels){
     File root = fs.open(dirname);
     if(!root)
     {
-        #if DEBUG_FILE_SYSTEM == true
+        #if FILE_SYSTEM_DEBUG == true
             Serial.println("- failed to open directory");
-        #endif /* DEBUG_FILE_SYSTEM */
+        #endif /* FILE_SYSTEM_DEBUG */
 
         return;
     }
 
     if(!root.isDirectory())
     {    
-        #if DEBUG_FILE_SYSTEM == true
+        #if FILE_SYSTEM_DEBUG == true
             Serial.println(" - not a directory");
-        #endif /* DEBUG_FILE_SYSTEM */
+        #endif /* FILE_SYSTEM_DEBUG */
         
         return;
     }
@@ -84,22 +84,22 @@ void FileSystemListDir(fs::FS &fs, const char * dirname, uint8_t levels){
     {
         if(file.isDirectory())
         {
-            #if DEBUG_FILE_SYSTEM == true
+            #if FILE_SYSTEM_DEBUG == true
                 Serial.print("  DIR : ");
-            #endif /* DEBUG_FILE_SYSTEM */
+            #endif /* FILE_SYSTEM_DEBUG */
 
-            #if CONFIG_LITTLEFS_FOR_IDF_3_2  && DEBUG_FILE_SYSTEM == true
+            #if CONFIG_LITTLEFS_FOR_IDF_3_2  && FILE_SYSTEM_DEBUG == true
                 Serial.println(file.name());
             #else
-                #if DEBUG_FILE_SYSTEM == true
+                #if FILE_SYSTEM_DEBUG == true
                     Serial.print(file.name());
-                #endif /* DEBUG_FILE_SYSTEM */
+                #endif /* FILE_SYSTEM_DEBUG */
 
                 time_t t= file.getLastWrite();
                 struct tm * tmstruct = localtime(&t);
-                #if DEBUG_FILE_SYSTEM == true
+                #if FILE_SYSTEM_DEBUG == true
                     Serial.printf("  LAST WRITE: %d-%02d-%02d %02d:%02d:%02d\n",(tmstruct->tm_year)+1900,( tmstruct->tm_mon)+1, tmstruct->tm_mday,tmstruct->tm_hour , tmstruct->tm_min, tmstruct->tm_sec);
-                #endif /* DEBUG_FILE_SYSTEM */
+                #endif /* FILE_SYSTEM_DEBUG */
             #endif  
 
             if(levels)
@@ -109,25 +109,25 @@ void FileSystemListDir(fs::FS &fs, const char * dirname, uint8_t levels){
         }
         else
         {
-            #if DEBUG_FILE_SYSTEM == true
+            #if FILE_SYSTEM_DEBUG == true
                 Serial.print("  FILE: ");
                 Serial.print(file.name());
                 Serial.print("  SIZE: ");
-            #endif /* DEBUG_FILE_SYSTEM */
+            #endif /* FILE_SYSTEM_DEBUG */
 
             #if CONFIG_LITTLEFS_FOR_IDF_3_2
                 Serial.println(file.size());
             #else
 
-                #if DEBUG_FILE_SYSTEM == true
+                #if FILE_SYSTEM_DEBUG == true
                     Serial.print(file.size());
-                #endif /* DEBUG_FILE_SYSTEM */
+                #endif /* FILE_SYSTEM_DEBUG */
                 time_t t= file.getLastWrite();
                 struct tm * tmstruct = localtime(&t);
                 
-                #if DEBUG_FILE_SYSTEM == true
+                #if FILE_SYSTEM_DEBUG == true
                     Serial.printf("  LAST WRITE: %d-%02d-%02d %02d:%02d:%02d\n",(tmstruct->tm_year)+1900, ( tmstruct->tm_mon)+1, tmstruct->tm_mday,tmstruct->tm_hour , tmstruct->tm_min, tmstruct->tm_sec);
-                #endif /* DEBUG_FILE_SYSTEM */
+                #endif /* FILE_SYSTEM_DEBUG */
             #endif
         }
 
@@ -137,30 +137,30 @@ void FileSystemListDir(fs::FS &fs, const char * dirname, uint8_t levels){
 /******************************************************************************/
 void FileSystemWriteFile( fs::FS &fs, const char * path, const char * message ){
     
-    #if DEBUG_FILE_SYSTEM == true
+    #if FILE_SYSTEM_DEBUG == true
         Serial.printf("Writing file: %s\r\n", path);
-    #endif /* DEBUG_FILE_SYSTEM */
+    #endif /* FILE_SYSTEM_DEBUG */
 
     File file = fs.open(path, FILE_WRITE);
     if(!file)
     {
-        #if DEBUG_FILE_SYSTEM == true
+        #if FILE_SYSTEM_DEBUG == true
             Serial.println("- failed to open file for writing\n");
-        #endif /* DEBUG_FILE_SYSTEM */
+        #endif /* FILE_SYSTEM_DEBUG */
         return;
     }
     
     if(file.print(message))
     {
-        #if DEBUG_FILE_SYSTEM == true
+        #if FILE_SYSTEM_DEBUG == true
             Serial.println("- file written\n");
-        #endif /* DEBUG_FILE_SYSTEM */
+        #endif /* FILE_SYSTEM_DEBUG */
     }
     else
     {
-        #if DEBUG_FILE_SYSTEM == true
+        #if FILE_SYSTEM_DEBUG == true
             Serial.println("- write failed\n");
-        #endif /* DEBUG_FILE_SYSTEM */
+        #endif /* FILE_SYSTEM_DEBUG */
     }
     file.close();
 }
@@ -168,32 +168,32 @@ void FileSystemWriteFile( fs::FS &fs, const char * path, const char * message ){
 void FileSystemAppendFile( fs::FS &fs, const char * path, const char * message )
 {
 
-    #if DEBUG_FILE_SYSTEM == true
+    #if FILE_SYSTEM_DEBUG == true
         Serial.printf("Appending to file: %s\r\n", path);
-    #endif /* DEBUG_FILE_SYSTEM */
+    #endif /* FILE_SYSTEM_DEBUG */
 
     File file = fs.open(path, FILE_APPEND);
 
     if(!file)
     {
-        #if DEBUG_FILE_SYSTEM == true
+        #if FILE_SYSTEM_DEBUG == true
             Serial.println("- failed to open file for appending");
-        #endif /* DEBUG_FILE_SYSTEM */
+        #endif /* FILE_SYSTEM_DEBUG */
         return;
     }
 
     if(file.print(message))
     {
-        #if DEBUG_FILE_SYSTEM == true
+        #if FILE_SYSTEM_DEBUG == true
             Serial.println("- message appended");
-        #endif /* DEBUG_FILE_SYSTEM */
+        #endif /* FILE_SYSTEM_DEBUG */
 
     }
     else
     {
-        #if DEBUG_FILE_SYSTEM == true
+        #if FILE_SYSTEM_DEBUG == true
             Serial.println("- append failed");
-        #endif /* DEBUG_FILE_SYSTEM */
+        #endif /* FILE_SYSTEM_DEBUG */
     }
 
     file.close();
@@ -201,29 +201,29 @@ void FileSystemAppendFile( fs::FS &fs, const char * path, const char * message )
 /******************************************************************************/
 void FileSystemReadFile( fs::FS &fs, const char * path )
 {
-    #if DEBUG_FILE_SYSTEM == true
+    #if FILE_SYSTEM_DEBUG == true
         Serial.printf("Reading file: %s\r\n", path);
-    #endif /* DEBUG_FILE_SYSTEM */
+    #endif /* FILE_SYSTEM_DEBUG */
 
     File file = fs.open(path);
     if(!file || file.isDirectory()){
 
-        #if DEBUG_FILE_SYSTEM == true
+        #if FILE_SYSTEM_DEBUG == true
             Serial.println("- failed to open file for reading");
-        #endif /* DEBUG_FILE_SYSTEM */
+        #endif /* FILE_SYSTEM_DEBUG */
 
         return;
     }
 
-    #if DEBUG_FILE_SYSTEM == true
+    #if FILE_SYSTEM_DEBUG == true
         Serial.println("- read from file:\n");
-    #endif /* DEBUG_FILE_SYSTEM */
+    #endif /* FILE_SYSTEM_DEBUG */
 
     while(file.available())
     {
-        #if DEBUG_FILE_SYSTEM == true
+        #if FILE_SYSTEM_DEBUG == true
             Serial.write(file.read());
-        #endif /* DEBUG_FILE_SYSTEM */
+        #endif /* FILE_SYSTEM_DEBUG */
     }
 
     file.close();
@@ -231,21 +231,21 @@ void FileSystemReadFile( fs::FS &fs, const char * path )
 /******************************************************************************/
 void FileSystemDeleteFile( fs::FS &fs, const char * path )
 {
-    #if DEBUG_FILE_SYSTEM == true
+    #if FILE_SYSTEM_DEBUG == true
         Serial.printf("Deleting file: %s\r\n", path);
-    #endif /* DEBUG_FILE_SYSTEM */
+    #endif /* FILE_SYSTEM_DEBUG */
 
     if(fs.remove(path))
     {
-        #if DEBUG_FILE_SYSTEM == true
+        #if FILE_SYSTEM_DEBUG == true
             Serial.println("- file deleted");
-        #endif /* DEBUG_FILE_SYSTEM */
+        #endif /* FILE_SYSTEM_DEBUG */
     }
     else
     {
-        #if DEBUG_FILE_SYSTEM == true
+        #if FILE_SYSTEM_DEBUG == true
             Serial.println("- delete failed");
-        #endif /* DEBUG_FILE_SYSTEM */
+        #endif /* FILE_SYSTEM_DEBUG */
     }
 }
 /******************************************************************************/
@@ -255,9 +255,9 @@ String FileSystemFindLastWrite( fs::FS &fs, const char * path, uint8_t buffer[],
 
     if(!file)
     {
-        #if DEBUG_FILE_SYSTEM == true
+        #if FILE_SYSTEM_DEBUG == true
             Serial.println("Erro ao tentar abrir arquivo");
-        #endif /* DEBUG_FILE_SYSTEM */
+        #endif /* FILE_SYSTEM_DEBUG */
 
         return "";
     }
@@ -266,9 +266,9 @@ String FileSystemFindLastWrite( fs::FS &fs, const char * path, uint8_t buffer[],
     {
         while(file.available())
         {
-            #if DEBUG_FILE_SYSTEM == true
+            #if FILE_SYSTEM_DEBUG == true
                 // Serial.write(file.read());
-            #endif /* DEBUG_FILE_SYSTEM */
+            #endif /* FILE_SYSTEM_DEBUG */
 
             file.read(buffer, offset);
 
@@ -278,9 +278,9 @@ String FileSystemFindLastWrite( fs::FS &fs, const char * path, uint8_t buffer[],
     }
     else 
     {
-        #if DEBUG_FILE_SYSTEM == true
+        #if FILE_SYSTEM_DEBUG == true
             Serial.println("Erro na função file.Seek()");
-        #endif /* DEBUG_FILE_SYSTEM */
+        #endif /* FILE_SYSTEM_DEBUG */
     }
 
     file.close();
@@ -303,9 +303,9 @@ bool FileSystemCreateFile( fs::FS &fs, const char * path )
 
     if(!file)
     {
-        #if DEBUG_FILE_SYSTEM == true
+        #if FILE_SYSTEM_DEBUG == true
             Serial.println("O arquivo não existe ou o caminho está errado.\n");
-        #endif /* DEBUG_FILE_SYSTEM */    
+        #endif /* FILE_SYSTEM_DEBUG */    
         return false;
     }
 
@@ -322,9 +322,9 @@ uint8_t FileSystemGetInterval(fs::FS &fs, const char * path, uint8_t lineStart, 
 
     if(!path)
     {
-        #if DEBUG_FILE_SYSTEM == true
+        #if FILE_SYSTEM_DEBUG == true
             Serial.printf("Erro no ao tentar abrir o arquivo. %s\n", path);
-        #endif /* DEBUG_FILE_SYSTEM */   
+        #endif /* FILE_SYSTEM_DEBUG */   
     }
 
    if(lineSize != 0)

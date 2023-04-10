@@ -1,41 +1,61 @@
 /******************************************************************************/
 #include "include/switch.h"
+#include "driver/gpio.h"
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/semphr.h"
 
 #include "Arduino.h"
 
+#include "../peripheral/include/peripheral_controller.h"
 #include "../../common/include/board_peripheral.h"
 /******************************************************************************/
-uint8_t switchPressed = 0;
-long int isrStartTime = 0;
-long int isrLastDebounceTime = 0;
+volatile bool ISR_Trigged = false;
+volatile int ISRPinSource = 0;
+uint8_t ISR_Edge = CHANGE;
+
 SemaphoreHandle_t xSwitchSemaphore;
+portMUX_TYPE SwitchMux = portMUX_INITIALIZER_UNLOCKED;
 /******************************************************************************/
-void SwitchISR_Configure( void (*isrHandle)(void *args) )
+#define GPIO_INPUT_IO_0 GPIO_NUM_32
+/******************************************************************************/
+void SwitchISR_Configure( void )
 {
-    attachInterruptArg(digitalPinToInterrupt(PIN_DIGITAL_SWITCH_0), ISR_Switch, (void*)PIN_DIGITAL_SWITCH_0, CHANGE);
-    attachInterruptArg(digitalPinToInterrupt(PIN_DIGITAL_SWITCH_1), ISR_Switch, (void*)PIN_DIGITAL_SWITCH_1, CHANGE);
+    uint8_t modeSelect = INTERRUPTOR;
+    modeSelect = digitalRead(PIN_DIGITAL_SWITCH_MODE);
+
+    if(modeSelect == PULSADOR)
+    {
+        ISR_Edge = RISING;
+        Serial.printf("Modo: PULSADOR\n");
+    }
+    else 
+    {
+        Serial.printf("Modo: INTERRUPTOR\n");
+    }
+
+    attachInterruptArg(digitalPinToInterrupt(PIN_DIGITAL_SWITCH_0), ISR_AUX_FUNCTION, (void*)PIN_DIGITAL_SWITCH_0, ISR_Edge);
+    attachInterruptArg(digitalPinToInterrupt(PIN_DIGITAL_SWITCH_1), ISR_AUX_FUNCTION, (void*)PIN_DIGITAL_SWITCH_1, ISR_Edge);
 }
 /******************************************************************************/
-void IRAM_ATTR ISR_Switch( void *args )
+void IRAM_ATTR ISR_AUX_FUNCTION(void * args)
 {
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-
-    switchPressed = (int)args;
-    isrStartTime = millis();
-
-    if(isrStartTime - isrLastDebounceTime > 100)
-    {
-        isrLastDebounceTime = isrStartTime;
+        
+    portENTER_CRITICAL_ISR(&SwitchMux);
+        ISR_Trigged = true;
+        ISRPinSource = (int) args;
+    
         xSemaphoreGiveFromISR(xSwitchSemaphore, &xHigherPriorityTaskWoken);
 
         if(xHigherPriorityTaskWoken == pdTRUE)
         {
-            portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
+            if(xHigherPriorityTaskWoken == pdTRUE)
+            {
+                portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
+            }
         }
-    }
+    portEXIT_CRITICAL(&SwitchMux);
 
 }
 /******************************************************************************/
@@ -44,7 +64,7 @@ void vTaskSwitchHandle( void *pvParameters )
     xSwitchSemaphore = xSemaphoreCreateBinary();
     if(xSwitchSemaphore != NULL)
     {
-        SwitchISR_Configure(ISR_Switch);
+        SwitchISR_Configure();
         Serial.printf("Semaforo criado com sucesso.\n");
     }
     else 
@@ -52,25 +72,50 @@ void vTaskSwitchHandle( void *pvParameters )
         Serial.printf("Erro durante a criação do semaforo.\n");
     }
 
-    // command_packet_t switchCommand;
-    uint8_t pinLastState = 0;
-    uint8_t pinToRead = 0;
+    uint8_t pinState = 0;
+    gpio_num_t ISR_SRC = GPIO_NUM_NC;
+    static uint8_t contador = 0;
 
     for(;;)
     {
         if(xSemaphoreTake( xSwitchSemaphore, portMAX_DELAY) == pdTRUE)
         {
-            /* @Hack: Alterar para adicionar na fila de coandos. */
-            switch (switchPressed)
+            if (ISR_Trigged == true)
             {
-                case PIN_DIGITAL_SWITCH_0:
-                    digitalWrite(PIN_DIGITAL_RELAY_0, !digitalRead(PIN_DIGITAL_RELAY_0));
-                    break;
-                case PIN_DIGITAL_SWITCH_1:
-                    digitalWrite(PIN_DIGITAL_RELAY_1, !digitalRead(PIN_DIGITAL_RELAY_1));
-                    break;
-                default:
-                    break;
+
+                ISR_SRC = (gpio_num_t) ISRPinSource;
+
+                pinState = digitalRead(ISR_SRC);
+                
+                if(pinState == HIGH)
+                {
+                    /* Disable interrupt service routine */
+                    // gpio_isr_handler_remove(ISR_SRC);
+                    detachInterrupt(ISR_SRC);
+
+                    while(digitalRead(ISR_SRC))
+                    {
+                        vTaskDelay(50 / portTICK_PERIOD_MS);
+                    }
+
+                    contador++;
+                    switch (ISR_SRC)
+                    {
+                        case PIN_DIGITAL_SWITCH_0:
+                            digitalWrite(PIN_DIGITAL_RELAY_1, !digitalRead(PIN_DIGITAL_RELAY_1));
+                            break;
+                        case PIN_DIGITAL_SWITCH_1:
+                            digitalWrite(PIN_DIGITAL_RELAY_2, !digitalRead(PIN_DIGITAL_RELAY_2));
+                            break;
+                        default:
+                            Serial.printf("Erro, fonte de interrupção:%i\n", ISR_SRC);
+                        break;
+                    }
+
+                    attachInterruptArg(digitalPinToInterrupt(ISR_SRC), ISR_AUX_FUNCTION, (void*)ISR_SRC, ISR_Edge);
+
+                }
+
             }
         }
     }

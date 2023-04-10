@@ -23,14 +23,14 @@
     #endif /* MQTT_ENABLE */ 
 
     #define COMMAND_DEBUG               true
-    #define RTC_DEBUG                   false
+    #define RTC_DEBUG                   true
     #define ISR_DEBUG                   true
     #define DIMMER_DEBUG                true
-    #define FILE_SYSTEM_DEBUG           false
+    #define FILE_SYSTEM_DEBUG           true
     #define SCENES_DEBUG                true
 #else
     #if defined WIFI_ENABLE && WIFI_ENABLE == true
-        #define WIFI_DEBUG                  façse
+        #define WIFI_DEBUG                  false
     #endif /* WIFI_ENABLE */
 
     #if defined MQTT_ENABLE && MQTT_ENABLE == true

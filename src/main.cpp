@@ -20,7 +20,7 @@ void setup()
 void loop()
 {
     #if MQTT_ENABLE == true
-      vTaskMqttHandleConnection(NULL);
+      // vTaskMqttHandleConnection(NULL);
     #endif /* MQTT_ENABLE */
 }
 /******************************************************************************/

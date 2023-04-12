@@ -8,13 +8,14 @@
 #include "../switch/include/switch.h"
 #include "../scenes/include/scenes.h"
 #include "../heartbeat/include/heartbeat.h"
-
+#include "../dimmer/include/dimmer.h"
 /******************************************************************************/
 void vTasksCreate( void *pvParameters )
 {
     xTaskCreatePinnedToCore(vTaskSwitchHandle, "SwitchHandle", configMINIMAL_STACK_SIZE + 1024, NULL, 1, NULL, 0);
     xTaskCreatePinnedToCore(vTaskRunCommand, "RunCommand", configMINIMAL_STACK_SIZE + 1024, NULL, 1, NULL, 0);
+    xTaskCreatePinnedToCore(vTaskScenesHandle, "TaskScenesHandle", configMINIMAL_STACK_SIZE + 10 * 1024, NULL, 1, NULL, 0);
+    xTaskCreatePinnedToCore(vTaskDimmer, "TaskDimmer", configMINIMAL_STACK_SIZE + 2048, NULL, 2, NULL, 1);
     xTaskCreatePinnedToCore(vTaskLedHeartbeat, "LedHeartbeat", configMINIMAL_STACK_SIZE, NULL, 1, NULL, 1);
-    xTaskCreatePinnedToCore(vTaskScenesHandle, "TaskScenesHandle", configMINIMAL_STACK_SIZE + 10 * 1024, NULL, 1, NULL, 1);
 }
 /******************************************************************************/

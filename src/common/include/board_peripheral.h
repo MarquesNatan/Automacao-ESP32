@@ -17,12 +17,14 @@
 
     #define PIN_DIGITAL_SWITCH_MODE      GPIO_NUM_36
 
-    /* Dimmer input control*/
-    #define PIN_ANALOGIC_POT_0          GPIO_NUM_17
-
     #define PIN_DIGITAL_SQW_RTC         GPIO_NUM_26
 
     #define PIN_DIGITAL_LED_HEARTBEAT   GPIO_NUM_2
+
+    #define PIN_DIGITAL_DIMMER_IN       GPIO_NUM_13
+    #define PIN_DIGITAL_DIMMER_OUT      GPIO_NUM_14
+    #define PIN_ANALOGIC_DIMMER_POT     GPIO_NUM_21
+
 /******************************************************************************/
 #endif /* BOARD_PERIPHERAL_H */
 /******************************************************************************/

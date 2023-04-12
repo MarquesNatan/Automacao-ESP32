@@ -26,6 +26,12 @@ void Peripheral_Init(void *params)
 
     pinMode(PIN_DIGITAL_SQW_RTC, INPUT_PULLUP);
 
+    pinMode(PIN_DIGITAL_DIMMER_IN, INPUT);
+
+    pinMode(PIN_DIGITAL_DIMMER_OUT, OUTPUT);
+    digitalWrite(PIN_DIGITAL_DIMMER_OUT, LOW);
+    
+
     Serial.begin(115200);
 }
 /******************************************************************************/

@@ -26,12 +26,12 @@ void System_Init(void *params)
 
     /* Configure WIFI */
     #if WIFI_ENABLE == true
-        Wifi_Init(NULL);
+       //  Wifi_Init(NULL);
     #endif /* WIFI_ENABLE */
 
     /* Configure MQTT */
     #if MQTT_ENABLE == true
-        Mqtt_Start(NULL);
+        // Mqtt_Start(NULL);
     #endif /* MQTT_ENABLE */
 }
 /******************************************************************************/

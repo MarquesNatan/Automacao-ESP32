@@ -17,6 +17,7 @@ void vTaskLedHeartbeat( void *pvParameters )
         digitalWrite(PIN_DIGITAL_LED_HEARTBEAT, LOW);
         vTaskDelay(pdMS_TO_TICKS(delayTimeMS));
         digitalWrite(PIN_DIGITAL_LED_HEARTBEAT, HIGH);
+        
         vTaskDelay(pdMS_TO_TICKS(delayTimeTask));
     }
 }

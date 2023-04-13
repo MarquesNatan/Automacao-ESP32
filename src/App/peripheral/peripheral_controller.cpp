@@ -30,6 +30,8 @@ void Peripheral_Init(void *params)
 
     pinMode(PIN_DIGITAL_DIMMER_OUT, OUTPUT);
     digitalWrite(PIN_DIGITAL_DIMMER_OUT, LOW);
+
+    pinMode(PIN_ANALOGIC_DIMMER_POT, INPUT);
     
 
     Serial.begin(115200);

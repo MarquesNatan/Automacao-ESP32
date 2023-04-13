@@ -125,26 +125,59 @@ void IRAM_ATTR SetTimerPinHigh( int16_t brightness )
 {
 
     isPinHighEnable = true;
-    
-    timerWrite(timerToPinHigh, 0);
-    timerAlarmWrite(timerToPinHigh, 6500, false);
+
+    timerWrite(timerToPinHigh, brightness);
+    timerAlarmWrite(timerToPinHigh, DIMMER_MAX_DELAY_US, false);
     timerAlarmEnable(timerToPinHigh);
 
 }
 /******************************************************************************/
-void brightnessCalc(uint16_t potRead)
+uint16_t brightnessCalc( void )
 {
+    uint16_t potRead;
+    potRead = analogRead(25);
 
+    uint16_t brightness = (uint16_t) (potRead * 1.9);
+
+    // brightness = (7250 - brightness);
+
+    if(potRead <= 10)
+    {
+      brightness = 0;
+    }
+
+    if (potRead < 4050)
+    {
+      brightness = 4000;
+    }
+
+    Serial.printf("pot: %i brilho: %i\n", potRead, brightness);
+
+    return brightness;
 }
 /******************************************************************************/
 void vTaskDimmer( void *pvParameters)
 {
+    uint16_t brightness;
+    uint16_t potValue;
+    uint16_t lastPotValue;
+
     DimmerConfig();
 
     vTaskDelay(1000 / portTICK_PERIOD_MS);
 
     for(;;)
     {
+        potValue = analogRead(PIN_ANALOGIC_DIMMER_POT);
+
+        if(lastPotValue != potValue)
+        {
+            // brightness = map(potValue, DIMMER_MIN_VALUE, DIMMER_MAX_VALUE, DIMMER_MIN_DELAY_US, DIMMER_MAX_DELAY_US);
+            brightness = ((potValue - DIMMER_MIN_VALUE) * (DIMMER_MAX_DELAY_US - DIMMER_MIN_DELAY_US)) / ((DIMMER_MAX_VALUE - DIMMER_MIN_VALUE) + DIMMER_MIN_DELAY_US);
+
+            lastPotValue = potValue;
+        }
+
 
         if(xSemaphoreTake( xDimmerSemaphore_ZCD, portMAX_DELAY) == pdTRUE)
         {
@@ -154,7 +187,7 @@ void vTaskDimmer( void *pvParameters)
             /* Aguarda o pino ficar em nível baixo */
             while(digitalRead(PIN_DIGITAL_DIMMER_IN));
 
-            SetTimerPinHigh(4000);
+            SetTimerPinHigh(brightness);
 
             if(xSemaphoreTake(xDimmerSemaphore_Timer, portMAX_DELAY) == pdTRUE)
             {

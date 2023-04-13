@@ -5,7 +5,7 @@
 #include "../../system/include/system_defs.h"
 /******************************************************************************/
     /* Relay control */
-    #define PIN_DIGITAL_RELAY_0         GPIO_NUM_1
+    #define PIN_DIGITAL_RELAY_0         GPIO_NUM_19
     #define PIN_DIGITAL_RELAY_1         GPIO_NUM_4
     #define PIN_DIGITAL_RELAY_2         GPIO_NUM_5
     #define PIN_DIGITAL_RELAY_3         GPIO_NUM_16
@@ -23,7 +23,7 @@
 
     #define PIN_DIGITAL_DIMMER_IN       GPIO_NUM_13
     #define PIN_DIGITAL_DIMMER_OUT      GPIO_NUM_14
-    #define PIN_ANALOGIC_DIMMER_POT     GPIO_NUM_21
+    #define PIN_ANALOGIC_DIMMER_POT     GPIO_NUM_39
 
 /******************************************************************************/
 #endif /* BOARD_PERIPHERAL_H */

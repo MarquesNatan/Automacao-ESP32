@@ -141,7 +141,7 @@ bool containsThisValue(uint8_t param, uint8_t values[], uint8_t len)
 int8_t paramsIsValid(uint8_t params[])
 {
     const char actions[4] = {COMM_TURN_ON_OUTPUT, COMM_TURN_OFF_OUTPUT, COMM_DIMMER_ADJUST, COMM_TOGGLE_OUTPUT};
-    const uint8_t outputs[5] = {0, 2, 4, 13, 15};
+    const uint8_t outputs[5] = {1, 4, 5, 16, 17};
 
     uint8_t qntError = 0;
     uint8_t i = 0;
@@ -162,7 +162,7 @@ int8_t paramsIsValid(uint8_t params[])
     {
         qntError = qntError + 1;
         #if COMMAND_DEBUG == true
-            Serial.printf("Erro no output.\n");
+            Serial.printf("Erro no output. %i\n", params[1]);
         #endif /* COMMAND_DEBUG */
     }
 

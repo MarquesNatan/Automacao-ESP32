@@ -4,7 +4,13 @@
 /******************************************************************************/
 #include <stdint.h>
 /******************************************************************************/
-#define DIMMER_ENABLE_PULSE_US          500
+#define DIMMER_ENABLE_PULSE_US          100
+
+#define DIMMER_MAX_DELAY_US             7300
+#define DIMMER_MIN_DELAY_US             100
+
+#define DIMMER_MIN_VALUE                0
+#define DIMMER_MAX_VALUE                4095
 /******************************************************************************/
 void DimmerConfig( void );
 void ISR_Dimmer( void *args );

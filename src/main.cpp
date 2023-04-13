@@ -19,8 +19,12 @@ void setup()
 /******************************************************************************/
 void loop()
 {
+
+  // brightnessCalculadora();
+  // vTaskDelay(500 / portTICK_PERIOD_MS);
+
     #if MQTT_ENABLE == true
-      // vTaskMqttHandleConnection(NULL);
+      vTaskMqttHandleConnection(NULL);
     #endif /* MQTT_ENABLE */
 }
 /******************************************************************************/

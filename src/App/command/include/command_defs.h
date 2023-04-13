@@ -11,10 +11,10 @@
 #define COMMAND_MAX_LENGTH          15
 #define COMMAND_MAX_PARAMS          3
 
-#define COMM_TURN_ON_OUTPUT         'L' /* <O.x> */
-#define COMM_TURN_OFF_OUTPUT        'D' /* <D.x> */
-#define COMM_DIMMER_ADJUST          'A' /* <D.O.V> */ /* O -> output V -> value */
-#define COMM_TOGGLE_OUTPUT          'T' /* <D.x> */
+#define COMM_TURN_ON_OUTPUT         'L' /* <O:x> */
+#define COMM_TURN_OFF_OUTPUT        'D' /* <D:x> */
+#define COMM_DIMMER_ADJUST          'A' /* <D:O:V> */ /* O -> output V -> value */
+#define COMM_TOGGLE_OUTPUT          'T' /* <D:x> */
 
 #define COMM_RESP_OK                'O' /* <O> */
 #define COMM_RESP_ERROR             'E' /* <E> */

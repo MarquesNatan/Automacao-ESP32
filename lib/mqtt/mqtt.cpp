@@ -84,7 +84,8 @@ void MQTT_tryConnect(void)
                 Serial.println("\n");
             #endif  /* MQTT_DEBUG */
 
-            MQTT.subscribe(PASTE3_SIMPLE(BOARD_ID, BOARD_BASE_TOPIC, BOARD_TOPIC_DIGITAL));
+            // MQTT.subscribe(PASTE3_SIMPLE(BOARD_ID, BOARD_BASE_TOPIC, BOARD_TOPIC_DIGITAL));
+            MQTT.subscribe("tccautomacao/digital/");
             MQTT.subscribe(PASTE3_SIMPLE(BOARD_ID, BOARD_BASE_TOPIC, BOARD_TIPOC_SCENES));
 
         }
@@ -116,31 +117,47 @@ void MQTT_DataReceiver(char *topic, uint8_t *data, unsigned int length)
     /* Tópico recebido é para execução de comandos */
     if(strcasestr(topic, "digital") || strcasestr(topic, "analogico"))
     {
-        if(getCommand(data, length))
-         {
-            if(newCommand.status == COMMAND_VALIDATION_WAIT)
-            {
-                xQueueSendToBack(commandQueue, &newCommand, portMAX_DELAY);
-                
-                #if COMMAND_DEBUG == true
-                    Serial.printf("Comando inserido na fila\n");
-                #endif /* COMMAND_DEBUG */
-            }
 
-            #if COMMAND_DEBUG == true
-                else 
-                {
-                    Serial.printf("\nCommando não inserido na fila.\n");
-                }
-            #endif /* COMMAND_DEBUG */
+        Serial.printf("Recebido: ");
+        for(int i = 0; i < length; i++)
+        {
+            Serial.printf("%c", data[i]);
         }
+        Serial.printf("\nTamanho %i:\n", length);
 
-        #if COMMAND_DEBUG == true
-            else 
-            {
-                Serial.printf("Erro durante e copia do comando.");
-            }
-        #endif /* COMMAND_DEBUG */
+
+        Serial.printf("Recebido int: ");
+        for(int i = 0; i < length; i++)
+        {
+            Serial.printf("%i", data[i]);
+        }
+        Serial.printf("\nTamanho %i:\n", length);
+
+        // if(getCommand(data, length))
+        // {
+        //     if(newCommand.status == COMMAND_VALIDATION_WAIT)
+        //     {
+        //         xQueueSendToBack(commandQueue, &newCommand, portMAX_DELAY);
+                
+        //         #if COMMAND_DEBUG == true
+        //             Serial.printf("Comando inserido na fila\n");
+        //         #endif /* COMMAND_DEBUG */
+        //     }
+
+        //     #if COMMAND_DEBUG == true
+        //         else 
+        //         {
+        //             Serial.printf("\nCommando não inserido na fila.\n");
+        //         }
+        //     #endif /* COMMAND_DEBUG */
+        // }
+
+        // #if COMMAND_DEBUG == true
+        //     else 
+        //     {
+        //         Serial.printf("Erro durante e copia do comando.");
+        //     }
+        // #endif /* COMMAND_DEBUG */
     }
     else 
     {

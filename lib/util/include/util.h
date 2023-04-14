@@ -4,7 +4,8 @@
 /******************************************************************************/
 #include "stdint.h"
 /******************************************************************************/
-uint8_t CharToByte(uint8_t buffer[], uint8_t offset, uint8_t length);
+uint8_t charToInt(uint8_t buffer[], uint8_t offset, uint8_t length);
+bool ValueIsPresent(uint8_t value, uint8_t listValues[], uint8_t startPosition, uint8_t length);
 /******************************************************************************/
 #endif /* UTIL_H */
 /******************************************************************************/

@@ -4,15 +4,12 @@
 #include "../../src/common/include/system_common.h"
 #include "../../src/common/include/board.h"
 
-#include "../../src/App/command/include/command.h"
-#include "../../src/App/scenes/include/scenes.h"
+#include "../../src/App/command/include/newCommand.h"
 
 #include <PubSubClient.h>
 #include <WiFi.h>
 /******************************************************************************/
-extern uint8_t *ptrParams[3];
-extern QueueHandle_t commandQueue;
-extern command_packet_t newCommand;
+extern QueueHandle_t xQueueCommandReceived;
 /******************************************************************************/
 extern WiFiClient espClient;
 PubSubClient MQTT(espClient);
@@ -111,63 +108,34 @@ void MQTT_setCallback(void (*callback)(char *topic, uint8_t *data, unsigned int 
 /******************************************************************************/
 void MQTT_DataReceiver(char *topic, uint8_t *data, unsigned int length)
 {
-    command_packet_t command; 
+    newcommand_t command; 
     uint8_t i = 0;
 
     /* Tópico recebido é para execução de comandos */
     if(strcasestr(topic, "digital") || strcasestr(topic, "analogico"))
     {
 
-        Serial.printf("Recebido: ");
-        for(int i = 0; i < length; i++)
-        {
-            Serial.printf("%c", data[i]);
-        }
-        Serial.printf("\nTamanho %i:\n", length);
+            for(int i = 0; i < 6; i++)
+            {
+                command.data[i] = data[i];
+                #if MQTT_DEBUG  == true
+                    Serial.printf("%c", command.data[i]);
+                    Serial.printf("\n");
+                #endif /* MQTT_DEBUG */
+            }
 
-
-        Serial.printf("Recebido int: ");
-        for(int i = 0; i < length; i++)
-        {
-            Serial.printf("%i", data[i]);
-        }
-        Serial.printf("\nTamanho %i:\n", length);
-
-        // if(getCommand(data, length))
-        // {
-        //     if(newCommand.status == COMMAND_VALIDATION_WAIT)
-        //     {
-        //         xQueueSendToBack(commandQueue, &newCommand, portMAX_DELAY);
-                
-        //         #if COMMAND_DEBUG == true
-        //             Serial.printf("Comando inserido na fila\n");
-        //         #endif /* COMMAND_DEBUG */
-        //     }
-
-        //     #if COMMAND_DEBUG == true
-        //         else 
-        //         {
-        //             Serial.printf("\nCommando não inserido na fila.\n");
-        //         }
-        //     #endif /* COMMAND_DEBUG */
-        // }
-
-        // #if COMMAND_DEBUG == true
-        //     else 
-        //     {
-        //         Serial.printf("Erro durante e copia do comando.");
-        //     }
-        // #endif /* COMMAND_DEBUG */
+        
+        xQueueSendToBack(xQueueCommandReceived, &command, portMAX_DELAY);
     }
     else 
     {
         /* É para agendar uma cena  */
-        if(RegisterNewScene(data, length))
-        {
-            #if SCENES_DEBUG == false
-                Serial.printf("Tarefa registrada com sucesso.\n");
-            #endif /* SCENES_DEBUG */
-        }
+        // if(RegisterNewScene(data, length))
+        // {
+        //     #if SCENES_DEBUG == false
+        //         Serial.printf("Tarefa registrada com sucesso.\n");
+        //     #endif /* SCENES_DEBUG */
+        // }
     }
 }
 /******************************************************************************/

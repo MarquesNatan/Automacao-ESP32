@@ -64,6 +64,10 @@
 #endif
 
 #define BOARD_ID                         "7db8cbb3-47f8-48a7-8c5a-d0aa81fad54b"
+
+
+#define BOARD_DIGITAL_OUTPUT            5
+#define BOARD_KNOW_COMMANDS             4
 /******************************************************************************/
 #endif /* SYSTEM_DEFS_H */
 /******************************************************************************/

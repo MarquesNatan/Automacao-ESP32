@@ -35,3 +35,20 @@ void System_Init(void *params)
     #endif /* MQTT_ENABLE */
 }
 /******************************************************************************/
+void System_InitializeFirstTime( void * pvParameters )
+{
+    bool configured = false;
+    for(;;)
+    {
+
+
+        if(configured == true)
+        {
+            break;
+        }
+    }
+    
+    
+    /* Deleta a tarefa depois de conectado uma única vez */
+    vTaskDelete(NULL);
+}

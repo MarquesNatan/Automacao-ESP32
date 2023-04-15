@@ -23,6 +23,7 @@ void Peripheral_Init(void *params)
     pinMode(PIN_DIGITAL_SWITCH_MODE, INPUT);
 
     pinMode(PIN_DIGITAL_LED_HEARTBEAT, OUTPUT);
+    pinMode(PIN_DIGITAL_LED_ERRO, OUTPUT);
 
     pinMode(PIN_DIGITAL_SQW_RTC, INPUT_PULLUP);
 

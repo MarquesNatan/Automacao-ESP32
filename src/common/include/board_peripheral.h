@@ -20,6 +20,7 @@
     #define PIN_DIGITAL_SQW_RTC         GPIO_NUM_26
 
     #define PIN_DIGITAL_LED_HEARTBEAT   GPIO_NUM_2
+    #define PIN_DIGITAL_LED_ERRO        GPIO_NUM_27
 
     #define PIN_DIGITAL_DIMMER_IN       GPIO_NUM_13
     #define PIN_DIGITAL_DIMMER_OUT      GPIO_NUM_14

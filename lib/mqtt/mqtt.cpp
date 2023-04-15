@@ -4,7 +4,7 @@
 #include "../../src/common/include/system_common.h"
 #include "../../src/common/include/board.h"
 
-#include "../../src/App/command/include/newCommand.h"
+#include "../../src/App/command/include/command.h"
 
 #include <PubSubClient.h>
 #include <WiFi.h>

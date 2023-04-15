@@ -1,5 +1,6 @@
 /******************************************************************************/
-#include "include/newCommand.h"
+#include "include/command.h"
+#include "../error/include/error.h"
 #include "../../lib/util/include/util.h"
 
 #include "Arduino.h"
@@ -9,6 +10,12 @@
 /******************************************************************************/
 QueueHandle_t xQueueCommandReceived;
 QueueHandle_t xQueueCommandReady;
+extern xQueueHandle xQueueChangeMode;
+/******************************************************************************/
+void CommandSetAlert( ERROR_ALERT_MODE mode)
+{
+    SetErrorAlert(mode);
+}
 /******************************************************************************/
 bool ValidateCommand(newcommand_t command, uint8_t receiver[])
 {
@@ -98,12 +105,15 @@ void vTaskCommandHandle( void *pvParameters )
                 #endif /* COMMAND_DEBUG */
 
                 xQueueSendToBack(xQueueCommandReady, commandParams, portMAX_DELAY);
+                CommandSetAlert(ERROR_ALERT_INITIALIZING);
 
             }
             #if COMMAND_DEBUG == true
                 else
                 {
                     Serial.printf("Erro, comando inválido.\n");
+
+                    CommandSetAlert(ERROR_ALERT_CONNECTION);
                 }
             #endif /* COMMAND_DEBUG */
         }

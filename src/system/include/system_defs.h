@@ -67,7 +67,7 @@
 
 
 #define BOARD_DIGITAL_OUTPUT            5
-#define BOARD_KNOW_COMMANDS             4
+#define BOARD_KNOW_COMMANDS             5
 /******************************************************************************/
 #endif /* SYSTEM_DEFS_H */
 /******************************************************************************/

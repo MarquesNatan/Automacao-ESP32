@@ -120,11 +120,13 @@ void MQTT_DataReceiver(char *topic, uint8_t *data, unsigned int length)
                 command.data[i] = data[i];
                 #if MQTT_DEBUG  == true
                     Serial.printf("%c", command.data[i]);
-                    Serial.printf("\n");
                 #endif /* MQTT_DEBUG */
             }
 
-        
+            #if MQTT_DEBUG  == true
+                Serial.printf("\n");
+            #endif /* MQTT_DEBUG */
+
         xQueueSendToBack(xQueueCommandReceived, &command, portMAX_DELAY);
     }
     else 

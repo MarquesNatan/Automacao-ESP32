@@ -9,7 +9,7 @@
 /******************************************************************************/
 typedef bool (*command_callback_func)(const char *, const char *);
 /******************************************************************************/
-#define COMMAND_DATA_LENGTH             6
+#define COMMAND_DATA_LENGTH             18
 #define COMMAND_CRC_LENGTH              2
 /******************************************************************************/
 #define COMMAND_TYPES_LEGTH             BOARD_KNOW_COMMANDS
@@ -19,6 +19,7 @@ typedef bool (*command_callback_func)(const char *, const char *);
 #define COMMAND_TOGGLE                  2
 #define COMMAND_ANALOGIC                3
 #define COMMAND_READ_PIN                4
+#define COMMAND_PIRSENSOR_ENABLE        5
 
 #define OUTPUT_LENGTH                   BOARD_DIGITAL_OUTPUT
 

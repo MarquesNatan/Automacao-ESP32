@@ -3,14 +3,16 @@
 #include "../error/include/error.h"
 #include "../../lib/util/include/util.h"
 #include "../../lib/mqtt/include/mqtt.h"
+#include "../pirsensor/include/pirsensor.h"
 
 #include "Arduino.h"
 
 #include "freertos/queue.h"
 #include "freertos/task.h"
 /******************************************************************************/
-QueueHandle_t xQueueCommandReceived;
-QueueHandle_t xQueueCommandReady;
+xQueueHandle xQueueCommandReceived;
+xQueueHandle xQueueCommandReady;
+/******************************************************************************/
 extern xQueueHandle xQueueChangeMode;
 static command_callback_func commandCallback;
 /******************************************************************************/
@@ -34,7 +36,7 @@ bool ValidateCommand(newcommand_t command, uint8_t receiver[])
     uint8_t out    = charToInt(command.data, 2, 2);
     uint8_t params  = charToInt(command.data, 4, 2);
 
-    uint8_t CommandType[] = {COMMAND_TURN_ON, COMMAND_TURN_OFF, COMMAND_TOGGLE, COMMAND_ANALOGIC, COMMAND_READ_PIN};
+    uint8_t CommandType[] = {COMMAND_TURN_ON, COMMAND_TURN_OFF, COMMAND_TOGGLE, COMMAND_ANALOGIC, COMMAND_READ_PIN, COMMAND_PIRSENSOR_ENABLE};
     uint8_t CommandOut[] = {OUTPUT_00, OUTPUT_01, OUTPUT_02, OUTPUT_03, OUTPUT_04};
 
     #if COMMAND_DEBUG == true
@@ -149,7 +151,7 @@ void vTaskCommandRun( void *pvParameters )
         /* Pega o comando que foi validado como certo */
         if(xQueueReceive(xQueueCommandReady, &commandParams, portMAX_DELAY) == pdTRUE)
         {
-            if(commandParams[0] != COMMAND_ANALOGIC && commandParams[0] != COMMAND_TOGGLE && commandParams[0] != COMMAND_READ_PIN)
+            if(commandParams[0] != COMMAND_ANALOGIC && commandParams[0] != COMMAND_TOGGLE && commandParams[0] != COMMAND_READ_PIN && commandParams[0] != COMMAND_PIRSENSOR_ENABLE)
             {
                 digitalWrite(commandParams[1], commandParams[0]);
                 Serial.printf("TURN_ON [%i:%i]\n", commandParams[0], commandParams[1]);
@@ -172,11 +174,12 @@ void vTaskCommandRun( void *pvParameters )
                 Serial.printf("COMMAND_READ_PIN [%i:%i]\n", commandParams[0], commandParams[1]);
             }
 
-            if(commandParams[1] != OUTPUT_ANALOGIC)
+
+            if(commandParams[1] != OUTPUT_ANALOGIC && commandParams[1] != COMMAND_PIRSENSOR_ENABLE)
             {
                 output = digitalRead(commandParams[1]);
 
-                msgRead[2] = (commandParams[1] & 0xF0) + '0';
+                msgRead[2] = ((commandParams[1] & 0xF0) >> 4) + '0';
                 msgRead[3] = (commandParams[1] & 0x0F) + '0';
 
                 msgRead[4] = (output & 0xF0) + '0';    
@@ -187,6 +190,7 @@ void vTaskCommandRun( void *pvParameters )
                     {
                         Serial.printf("%c", msgRead[i]);
                     }
+                    Serial.println();
                 #endif /* COMMAND_DEBUG */
             }
             

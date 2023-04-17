@@ -83,6 +83,7 @@ void MQTT_tryConnect(void)
 
             // MQTT.subscribe(PASTE3_SIMPLE(BOARD_ID, BOARD_BASE_TOPIC, BOARD_TOPIC_DIGITAL));
             MQTT.subscribe("tccautomacao/digital/");
+            MQTT.subscribe("tccautomacao/sensor/");
             MQTT.subscribe(PASTE3_SIMPLE(BOARD_ID, BOARD_BASE_TOPIC, BOARD_TIPOC_SCENES));
 
         }
@@ -114,8 +115,7 @@ void MQTT_DataReceiver(char *topic, uint8_t *data, unsigned int length)
     /* Tópico recebido é para execução de comandos */
     if(strcasestr(topic, "digital") || strcasestr(topic, "analogico"))
     {
-
-            for(int i = 0; i < 6; i++)
+            for(int i = 0; i < length; i++)
             {
                 command.data[i] = data[i];
                 #if MQTT_DEBUG  == true
@@ -131,13 +131,8 @@ void MQTT_DataReceiver(char *topic, uint8_t *data, unsigned int length)
     }
     else 
     {
-        /* É para agendar uma cena  */
-        // if(RegisterNewScene(data, length))
-        // {
-        //     #if SCENES_DEBUG == false
-        //         Serial.printf("Tarefa registrada com sucesso.\n");
-        //     #endif /* SCENES_DEBUG */
-        // }
+        /* Trata os comandos para o sensor */
+
     }
 }
 /******************************************************************************/

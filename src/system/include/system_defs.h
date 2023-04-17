@@ -28,6 +28,7 @@
     #define DIMMER_DEBUG                true
     #define FILE_SYSTEM_DEBUG           true
     #define SCENES_DEBUG                true
+    #define PIR_SENSOR_DEBUG            true
 #else
     #if defined WIFI_ENABLE && WIFI_ENABLE == true
         #define WIFI_DEBUG                  false
@@ -67,7 +68,8 @@
 
 
 #define BOARD_DIGITAL_OUTPUT            5
-#define BOARD_KNOW_COMMANDS             5
+#define BOARD_ANALOGIC_OUTPUT           1
+#define BOARD_KNOW_COMMANDS             6
 /******************************************************************************/
 #endif /* SYSTEM_DEFS_H */
 /******************************************************************************/

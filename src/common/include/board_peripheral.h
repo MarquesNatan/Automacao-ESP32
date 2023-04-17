@@ -14,7 +14,6 @@
     /* Switch input */
     #define PIN_DIGITAL_SWITCH_0        GPIO_NUM_32
     #define PIN_DIGITAL_SWITCH_1        GPIO_NUM_33
-
     #define PIN_DIGITAL_SWITCH_MODE      GPIO_NUM_36
 
     #define PIN_DIGITAL_SQW_RTC         GPIO_NUM_26
@@ -25,6 +24,8 @@
     #define PIN_DIGITAL_DIMMER_IN       GPIO_NUM_13
     #define PIN_DIGITAL_DIMMER_OUT      GPIO_NUM_14
     #define PIN_ANALOGIC_DIMMER_POT     GPIO_NUM_39
+
+    #define PIN_DIGITAL_PIR_IN          GPIO_NUM_26
 
 /******************************************************************************/
 #endif /* BOARD_PERIPHERAL_H */

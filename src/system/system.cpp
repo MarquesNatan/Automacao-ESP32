@@ -11,7 +11,6 @@
 
 #include "../lib/wifi/include/my_wifi.h"
 #include "../lib/mqtt/include/mqtt.h"
-#include "../lib/RTC/include/rtc.h"
 /******************************************************************************/
 extern PubSubClient MQTT;
 extern QueueHandle_t commQueue;
@@ -20,10 +19,7 @@ void System_Init(void *params)
 {
     /* Configure IO */
     Peripheral_Init(NULL);
-
-    /* RTC Start */
-    RTC_Init(NULL);
-
+    
     /* Configure WIFI */
     #if WIFI_ENABLE == true
         Wifi_Init(NULL);

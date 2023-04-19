@@ -25,14 +25,15 @@ void Peripheral_Init(void *params)
     pinMode(PIN_DIGITAL_LED_HEARTBEAT, OUTPUT);
     pinMode(PIN_DIGITAL_LED_ERRO, OUTPUT);
 
-    pinMode(PIN_DIGITAL_SQW_RTC, INPUT_PULLUP);
-
     pinMode(PIN_DIGITAL_DIMMER_IN, INPUT);
 
     pinMode(PIN_DIGITAL_DIMMER_OUT, OUTPUT);
     digitalWrite(PIN_DIGITAL_DIMMER_OUT, LOW);
 
     pinMode(PIN_ANALOGIC_DIMMER_POT, INPUT);
+
+    pinMode(PIN_DIGITAL_PIR_IN, INPUT);
+    pinMode(PIN_DIGITAL_LDR_IN, INPUT);
     
 
     Serial.begin(115200);

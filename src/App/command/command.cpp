@@ -96,12 +96,6 @@ void vTaskCommandHandle( void *pvParameters )
         return;
     }
 
-    if(xTaskCreatePinnedToCore(vTaskCommandRun, "vTaskCommandRun", configMINIMAL_STACK_SIZE + 1024, NULL, 1, NULL, 1) != pdPASS)
-    {
-        Serial.printf("Erro ao criar task de execução de comandos\n");
-        return;
-    }
-
     for(;;)
     {
         /* Pega o comando que foi enviado para a fila de comandos */
@@ -129,8 +123,6 @@ void vTaskCommandHandle( void *pvParameters )
                 }
             #endif /* COMMAND_DEBUG */
         }
-
-        vTaskDelay(100 / portTICK_PERIOD_MS);
     }
 
 }
@@ -176,7 +168,7 @@ void vTaskCommandRun( void *pvParameters )
             {
                 output = digitalRead(commandParams[1]);
 
-                msgRead[2] = (commandParams[1] & 0xF0) + '0';
+                msgRead[2] = ((commandParams[1] & 0xF0) >> 4) + '0';
                 msgRead[3] = (commandParams[1] & 0x0F) + '0';
 
                 msgRead[4] = (output & 0xF0) + '0';    
@@ -187,11 +179,13 @@ void vTaskCommandRun( void *pvParameters )
                     {
                         Serial.printf("%c", msgRead[i]);
                     }
+
+                    Serial.println();
                 #endif /* COMMAND_DEBUG */
             }
             
             /* Envia o estado atual da saída /  valor de ajuste analógico */
-            (*commandCallback)(msgRead, topic);
+            // (*commandCallback)(msgRead, topic);
         }
     }
 }

@@ -115,17 +115,10 @@ void MQTT_DataReceiver(char *topic, uint8_t *data, unsigned int length)
     if(strcasestr(topic, "digital") || strcasestr(topic, "analogico"))
     {
 
-            for(int i = 0; i < 6; i++)
-            {
-                command.data[i] = data[i];
-                #if MQTT_DEBUG  == true
-                    Serial.printf("%c", command.data[i]);
-                #endif /* MQTT_DEBUG */
-            }
-
-            #if MQTT_DEBUG  == true
-                Serial.printf("\n");
-            #endif /* MQTT_DEBUG */
+        for(int i = 0; i < 6; i++)
+        {
+            command.data[i] = data[i];
+        }
 
         xQueueSendToBack(xQueueCommandReceived, &command, portMAX_DELAY);
     }

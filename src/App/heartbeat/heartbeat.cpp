@@ -66,12 +66,14 @@ void heartbeatConnectionError( void )
 /******************************************************************************/
 void heartbeatNormalMode( void )
 {
+    for(;;)
+    {
+        digitalWrite(PIN_DIGITAL_LED_HEARTBEAT, LOW);
+        vTaskDelay(pdMS_TO_TICKS(250));
+        digitalWrite(PIN_DIGITAL_LED_HEARTBEAT, HIGH);
 
-    digitalWrite(PIN_DIGITAL_LED_HEARTBEAT, LOW);
-    vTaskDelay(pdMS_TO_TICKS(250));
-    digitalWrite(PIN_DIGITAL_LED_HEARTBEAT, HIGH);
-
-    vTaskDelay(pdMS_TO_TICKS(1000));
+        vTaskDelay(pdMS_TO_TICKS(1000));
+    }
 }
 /******************************************************************************/
 void heartbeatInitializing( void )

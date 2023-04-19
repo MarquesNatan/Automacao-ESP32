@@ -16,8 +16,6 @@
     #define PIN_DIGITAL_SWITCH_1        GPIO_NUM_33
     #define PIN_DIGITAL_SWITCH_MODE      GPIO_NUM_36
 
-    #define PIN_DIGITAL_SQW_RTC         GPIO_NUM_26
-
     #define PIN_DIGITAL_LED_HEARTBEAT   GPIO_NUM_2
     #define PIN_DIGITAL_LED_ERRO        GPIO_NUM_27
 
@@ -26,6 +24,7 @@
     #define PIN_ANALOGIC_DIMMER_POT     GPIO_NUM_39
 
     #define PIN_DIGITAL_PIR_IN          GPIO_NUM_26
+    #define PIN_DIGITAL_LDR_IN          GPIO_NUM_34
 
 /******************************************************************************/
 #endif /* BOARD_PERIPHERAL_H */

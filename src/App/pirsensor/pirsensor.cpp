@@ -1,76 +1,215 @@
 /******************************************************************************/
 #include "include/pirsensor.h"
-#include "Preferences.h"
-
-#include "../src/system/include/system_defs.h"
 #include "../../common/include/board_peripheral.h"
+#include "Arduino.h"
 
+#include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "freertos/queue.h"
 #include "freertos/semphr.h"
 /******************************************************************************/
-xSemaphoreHandle xSemaphorePIRSensor;
-xQueueHandle xQueuePirSensor; 
-portMUX_TYPE PIRSensorMux = portMUX_INITIALIZER_UNLOCKED;
+xSemaphoreHandle xSemaphorePirSensor;
+xSemaphoreHandle xSemaphoreLDRsensor;
 /******************************************************************************/
-static bool pirIsEnabled = false;
+portMUX_TYPE TimerLDRMux = portMUX_INITIALIZER_UNLOCKED;
+portMUX_TYPE PirSensorMux = portMUX_INITIALIZER_UNLOCKED;
 /******************************************************************************/
-void PirSensor_EnableInterrupts( void )
+hw_timer_t *TimerLDRDebouce = timerBegin(2, 80, true);
+hw_timer_t *TimerTimeoutPirSensor = timerBegin(3, 80, true);
+/******************************************************************************/
+bool timeout = false;
+/******************************************************************************/
+void PirSensorAttachInterrutps( void )
 {
-    attachInterrupt(digitalPinToInterrupt(PIN_DIGITAL_PIR_IN), ISR_PIRSensor, RISING);
+    attachInterrupt(digitalPinToInterrupt(PIN_DIGITAL_PIR_IN), &ISR_PirSensor, RISING);
+    timerAttachInterrupt(TimerLDRDebouce, &ISR_DebounceLDR  , true);
+    timerAttachInterrupt(TimerTimeoutPirSensor, &ISR_TimeoutPirSensor  , true);
 }
 /******************************************************************************/
-void IRAM_ATTR ISR_PIRSensor( void )
+void SetTimerLDRDebounce( void )
+{
+    timerWrite(TimerLDRDebouce, 0);
+    timerAlarmWrite(TimerLDRDebouce, LDR_DEBOUNCE_TIME_US, false);
+    timerAlarmEnable(TimerLDRDebouce);
+}
+/******************************************************************************/
+void IRAM_ATTR ISR_DebounceLDR( void )
 {
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
         
-    portENTER_CRITICAL_ISR(&PIRSensorMux);
-    
-        xSemaphoreGiveFromISR(xSemaphorePIRSensor, &xHigherPriorityTaskWoken);
+    portENTER_CRITICAL_ISR(&TimerLDRMux);
+
+        timerAlarmDisable(TimerLDRDebouce);
+
+        xSemaphoreGiveFromISR(xSemaphoreLDRsensor, &xHigherPriorityTaskWoken);
 
         if(xHigherPriorityTaskWoken == pdTRUE)
         {
-            if(xHigherPriorityTaskWoken == pdTRUE)
-            {
-                portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
-            }
+            portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
         }
-    portEXIT_CRITICAL(&PIRSensorMux);
+    portEXIT_CRITICAL(&TimerLDRMux);
 
 }
 /******************************************************************************/
-bool xQueuePirSensorCreate( void )
+void IRAM_ATTR ISR_PirSensor( void )
 {
-    if(xQueuePirSensor == NULL)
-    {
-        xQueuePirSensor = xQueueCreate(1, sizeof(uint8_t));
-        if(xQueuePirSensor == NULL)
-        {
-            return false;
-        }
-    }
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+        
+    portENTER_CRITICAL_ISR(&PirSensorMux);
 
-    return true;
+        timeout = false;
+        xSemaphoreGiveFromISR(xSemaphorePirSensor, &xHigherPriorityTaskWoken);
+
+        if(xHigherPriorityTaskWoken == pdTRUE)
+        {
+            portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
+        }
+    portEXIT_CRITICAL(&PirSensorMux);
+
 }
 /******************************************************************************/
-void vTaskPIRSensorHandle( void *pvParameters )
+void IRAM_ATTR ISR_TimeoutPirSensor( void )
 {
-    if(xQueuePirSensor == NULL)
-    {
-        xQueuePirSensor = xQueueCreate(1, sizeof(uint8_t));
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+        
+    portENTER_CRITICAL_ISR(&PirSensorMux);
 
-        if(xQueuePirSensor == NULL )
+        timeout = true;
+
+        if(xHigherPriorityTaskWoken == pdTRUE)
         {
-            Serial.printf("Erro, ao criar fila do Sensor PIR.\n");
+            portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
+        }
+    portEXIT_CRITICAL(&PirSensorMux);
+
+}
+/******************************************************************************/
+void SetTimerTimeout( void )
+{
+
+    timerAlarmDisable(TimerTimeoutPirSensor);
+
+    timeout = false;
+
+    timerWrite(TimerTimeoutPirSensor, 0);
+    timerAlarmWrite(TimerTimeoutPirSensor, PIR_SENSOR_TIMEOUT_US, false);
+    timerAlarmEnable(TimerTimeoutPirSensor);
+}
+/******************************************************************************/
+void vTaskPirSensorHandle( void * pvParameters)
+{
+    bool ldrIsEnabled = false;
+    bool LDRCurrState = false;
+
+    uint8_t outputValue = 0;
+
+    if(xSemaphorePirSensor == NULL)
+    {
+        xSemaphorePirSensor = xSemaphoreCreateBinary();
+        if(xSemaphorePirSensor == NULL)
+        {
+            #if PIR_SENSOR_DEBUG == true
+                Serial.printf("Erro ao criar semaforo do sensor de presença.\n");
+            #endif /* PIR_SENSOR_DEBUG */
+            return;
         }
     }
+
+    if(xSemaphoreLDRsensor == NULL)
+    {
+        xSemaphoreLDRsensor = xSemaphoreCreateBinary();
+        if(xSemaphoreLDRsensor == NULL)
+        {
+            #if PIR_SENSOR_DEBUG == true
+                Serial.printf("Erro ao criar semaforo do sensor de luminosidade.\n");
+            #endif /* PIR_SENSOR_DEBUG */
+
+            return;
+        }
+    }
+
+    PirSensorAttachInterrutps();
+
 
     for(;;)
     {
+        ldrIsEnabled = (bool)digitalRead(PIN_DIGITAL_LDR_IN);
 
-        vTaskDelay(pdMS_TO_TICKS(1000));
+        if(ldrIsEnabled)
+        {
+            SetTimerLDRDebounce();
+
+            if(xSemaphoreTake(xSemaphoreLDRsensor, portMAX_DELAY) == pdTRUE)
+            {
+                LDRCurrState = (bool)digitalRead(PIN_DIGITAL_LDR_IN);
+
+                
+                if(LDRCurrState == ldrIsEnabled)
+                {
+                    /* Verificação do sensor de presença */
+                    if(xSemaphoreTake(xSemaphorePirSensor, 0) == pdTRUE)
+                    {
+                        Serial.printf("Semaforo PIR capturado com sucesso.\n");
+                        detachInterrupt(digitalPinToInterrupt(PIN_DIGITAL_PIR_IN));
+
+                        while(digitalRead(PIN_DIGITAL_PIR_IN))
+                        {
+                            vTaskDelay(pdMS_TO_TICKS(300));
+                        }
+
+                        outputValue = digitalRead(OUTPUT_ENABLED_PIR_SENSOR);
+                        if(!outputValue)
+                        {
+                            #if PIR_SENSOR_DEBUG == true
+                                Serial.printf("Ligando led, sensor de presença ativado.\n");
+                            #endif /* PIR_SENSOR_DEBUG */
+
+                            digitalWrite(OUTPUT_ENABLED_PIR_SENSOR, HIGH);
+                        }
+
+                        /* A cada pulso do sensor de presença o timeout é reiniciado  */
+                        SetTimerTimeout();
+
+                        /* Reanexa a interrupção */
+                        attachInterrupt(digitalPinToInterrupt(PIN_DIGITAL_PIR_IN), &ISR_PirSensor, RISING);
+
+                    }
+                    else if(timeout)
+                    {
+                        outputValue = digitalRead(OUTPUT_ENABLED_PIR_SENSOR);
+                        if(outputValue)
+                        {
+                            #if PIR_SENSOR_DEBUG == true
+                                Serial.printf("DELIGANDO OUTPUT: TIMEOUT \n");
+                            #endif /* PIR_SENSOR_DEBUG */
+
+                            digitalWrite(OUTPUT_ENABLED_PIR_SENSOR, LOW);
+
+                            /* Inicia o timeout */
+                            timeout = false;
+                        }
+                        
+                    }
+                    
+                }
+                else if(!LDRCurrState)
+                {
+
+                    outputValue = digitalRead(OUTPUT_ENABLED_PIR_SENSOR);
+                    if(outputValue)
+                    {
+                         #if PIR_SENSOR_DEBUG == true
+                            Serial.printf("DELIGANDO OUTPUT: Mundança no nível do LDR.\n");
+                        #endif /* PIR_SENSOR_DEBUG */
+
+                        digitalWrite(OUTPUT_ENABLED_PIR_SENSOR, LOW);
+
+                        /* Inicia o timeout */
+                    }
+
+                }
+            }
+
+        }
     }
-
 }
 /******************************************************************************/
-

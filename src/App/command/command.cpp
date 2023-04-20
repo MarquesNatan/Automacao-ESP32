@@ -42,7 +42,7 @@ bool ValidateCommand(newcommand_t command, uint8_t receiver[])
     #if COMMAND_DEBUG == true
         if(sizeof(CommandType) != COMMAND_TYPES_LEGTH || sizeof(CommandOut) != OUTPUT_LENGTH)
         {
-           Serial.printf("Erro na quantidade de comandos/saidas.");
+           Serial.printf("Erro na quantidade de comandos/saidas.\n");
         }
     #endif /* COMMAND_DEBUG */
 
@@ -187,7 +187,7 @@ void vTaskCommandRun( void *pvParameters )
             }
             
             /* Envia o estado atual da saída /  valor de ajuste analógico */
-            // (*commandCallback)(msgRead, topic);
+            (*commandCallback)(msgRead, topic);
         }
     }
 }

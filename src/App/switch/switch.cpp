@@ -61,15 +61,13 @@ void IRAM_ATTR ISR_AUX_FUNCTION(void * args)
 /******************************************************************************/
 void vTaskSwitchHandle( void *pvParameters )
 {
+    SwitchISR_Configure();
+
     xSwitchSemaphore = xSemaphoreCreateBinary();
-    if(xSwitchSemaphore != NULL)
+
+    if(xSwitchSemaphore == NULL)
     {
-        SwitchISR_Configure();
-        Serial.printf("Semaforo criado com sucesso.\n");
-    }
-    else 
-    {
-        Serial.printf("Erro durante a criação do semaforo.\n");
+        Serial.printf("Erro ao criar semaforo.\n");
     }
 
     uint8_t pinState = 0;

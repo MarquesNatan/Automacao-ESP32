@@ -17,25 +17,20 @@ void Wifi_Init(void *params)
     }
 
     #if WIFI_DEBUG == true
-        Serial.printf("*********************************************");
-        Serial.printf("\n* Conetando-se a rede: %s      *", WIFI_SSID);
-        Serial.printf("\n*********************************************\n");
+        Serial.printf("* Conetando-se a rede: %s      *\n", WIFI_SSID);
     #endif /* WIFI_DEBUG */
 
     WiFi.begin(WIFI_SSID, WIFI_PASS);
     while(WiFi.status() != WL_CONNECTED)
     {
-        delay(100);
+        vTaskDelay(pdTICKS_TO_MS(100));
         #if WIFI_DEBUG == true
             Serial.print(".");
         #endif /* WIFI_DEBUG */
     }
 
     #if WIFI_DEBUG == true
-        Serial.printf("\n*********************************************");
-        Serial.printf("\nConectado com sucesso, IP obtido: ");
-        Serial.print(WiFi.localIP());
-        Serial.printf("\n*********************************************");
+        Serial.printf("Conectado com sucesso, IP obtido: \n", WiFi.localIP());
     #endif /* WIFI_DEBUG */
 }
 /******************************************************************************/

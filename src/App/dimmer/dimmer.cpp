@@ -179,7 +179,7 @@ void vTaskDimmer( void *pvParameters)
         }
 
 
-        if(xSemaphoreTake( xDimmerSemaphore_ZCD, portMAX_DELAY) == pdTRUE)
+        if(xSemaphoreTake( xDimmerSemaphore_ZCD, portMAX_DELAY ) == pdTRUE)
         {
             /* Desativa a interrupção */
             detachInterrupt(digitalPinToInterrupt(PIN_DIGITAL_DIMMER_IN));
@@ -196,6 +196,7 @@ void vTaskDimmer( void *pvParameters)
                 if(xSemaphoreTake(xDimmerSemaphore_TimerLow, portMAX_DELAY) == pdTRUE)
                 {
                     /* Ativa a interrupção novamente */
+                    
                     attachInterruptArg(digitalPinToInterrupt(PIN_DIGITAL_DIMMER_IN), ISR_Dimmer, (void*)PIN_DIGITAL_DIMMER_IN, RISING);
                 }
             }

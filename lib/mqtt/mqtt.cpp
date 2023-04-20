@@ -42,17 +42,15 @@ void Mqtt_Start(void *params)
     if(mqtt_callback_func != NULL)
     {
         MQTT.setCallback(MQTT_DataReceiver);
-        #if MQTT_DEBUG  == true
-            Serial.printf("\nFunção de callback definida.\n");
-        #endif /* MQTT_DEBUG */
-    }
-    #if MQTT_DEBUG  == true
-        else 
+
+        if(mqtt_callback_func == NULL)
         {
             Serial.printf("Erro, função de callback não definida");
-            while (true);
+
+            return;
         }
-    #endif /* MQTT_DEBUG */
+    }
+    
 }
 /******************************************************************************/
 void MQTT_tryConnect(void)
@@ -62,30 +60,20 @@ void MQTT_tryConnect(void)
     while (!MQTT.connected())
     {
         #if MQTT_DEBUG  == true
-            Serial.printf("******************************************************");
-            Serial.printf("\n* Conectando ao Broker MQTT: %s\n*", MQTT_PUBLIC_BROKER);
-            Serial.printf("******************************************************");
+            Serial.printf("Conectando ao Broker MQTT: %s\n", MQTT_PUBLIC_BROKER);
         #endif /* MQTT_DEBUG */
 
         if (MQTT.connect(BOARD_ID))
         {   
             #if MQTT_DEBUG  == true
-                Serial.println("\nConectado ao Broker com sucesso!\n");
+                Serial.println("Conectado ao Broker com sucesso\n");
             #endif /* MQTT_DEBUG */
 
             #if MQTT_DEBUG  == true
-                Serial.println("\n");
-                Serial.printf(PASTE3_SIMPLE(BOARD_ID, BOARD_BASE_TOPIC, BOARD_TOPIC_DIGITAL));
-                Serial.println("\n");
-                Serial.printf(PASTE3_SIMPLE(BOARD_ID, BOARD_BASE_TOPIC, BOARD_TIPOC_SCENES));
-                Serial.println("\n");
+                Serial.printf("Subscribe: tccautomacao/digital/\n");
             #endif  /* MQTT_DEBUG */
 
-            // MQTT.subscribe(PASTE3_SIMPLE(BOARD_ID, BOARD_BASE_TOPIC, BOARD_TOPIC_DIGITAL));
             MQTT.subscribe("tccautomacao/digital/");
-            MQTT.subscribe("tccautomacao/sensor/");
-            MQTT.subscribe(PASTE3_SIMPLE(BOARD_ID, BOARD_BASE_TOPIC, BOARD_TIPOC_SCENES));
-
         }
         else
         {
@@ -96,7 +84,7 @@ void MQTT_tryConnect(void)
                 #endif /* MQTT_DEBUG */
 
                 temp = temp - 1;
-                delay(1000);
+                vTaskDelay(pdMS_TO_TICKS(1000));
             }
         }
     }

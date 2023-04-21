@@ -30,6 +30,10 @@ void Wifi_Init(void *params)
     }
 
     #if WIFI_DEBUG == true
+        Serial.print("\n");
+    #endif /* WIFI_DEBUG */
+
+    #if WIFI_DEBUG == true
         Serial.printf("Conectado com sucesso, IP obtido: \n", WiFi.localIP());
     #endif /* WIFI_DEBUG */
 }

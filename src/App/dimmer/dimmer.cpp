@@ -7,6 +7,7 @@
 #include "../../common/include/board_peripheral.h"
 
 #include "freertos/FreeRTOS.h"
+#include "freertos/queue.h"
 #include "freertos/semphr.h"
 #include "freertos/task.h"
 
@@ -14,6 +15,8 @@
 SemaphoreHandle_t xDimmerSemaphore_ZCD;
 SemaphoreHandle_t xDimmerSemaphore_Timer;
 SemaphoreHandle_t xDimmerSemaphore_TimerLow;
+/******************************************************************************/
+xQueueHandle xQueueChangeDimmerValue;
 /******************************************************************************/
 hw_timer_t *timerToPinHigh = timerBegin(1, 80, true);
 hw_timer_t *timerToPinLow = timerBegin(0, 80, true);
@@ -25,6 +28,8 @@ portMUX_TYPE DimmerMuxTimerPinLow = portMUX_INITIALIZER_UNLOCKED;
 portMUX_TYPE DimmerMuxTimerPinHigh = portMUX_INITIALIZER_UNLOCKED;
 volatile bool ISRDimmer_Enable = false;
 /******************************************************************************/
+static uint16_t movingAverageBuffer[DIMMER_MOVING_AVERAGE_SAMPLE];
+/******************************************************************************/
 void DimmerConfig( void )
 {
     xDimmerSemaphore_ZCD = xSemaphoreCreateBinary();
@@ -35,7 +40,15 @@ void DimmerConfig( void )
     {
         Serial.printf("\nErro ao criar xSemaphoreDimmer OU xDimmerSemaphore_Timer\n");
 
-        while(true);
+        return;
+    }
+
+    xQueueChangeDimmerValue = xQueueCreate(1, sizeof(uint16_t));
+
+    if(xQueueChangeDimmerValue == NULL)
+    {
+        Serial.printf("Erro ao criar fila DimmerValue.\n");
+        return;
     }
     
     /* Configura a interrupção para o ZCD */
@@ -156,11 +169,39 @@ uint16_t brightnessCalc( void )
     return brightness;
 }
 /******************************************************************************/
+long int CalculaMediaMovel(long int value)
+{
+
+    long int sum = 0;
+
+    for(int i = DIMMER_MOVING_AVERAGE_SAMPLE - 1; i > 0; i--)
+    {
+        movingAverageBuffer[i] = movingAverageBuffer[i - 1];
+    }
+
+    movingAverageBuffer[0] = value;
+
+    for(int i = 0; i < DIMMER_MOVING_AVERAGE_SAMPLE; i++)
+    {
+        sum += movingAverageBuffer[i];
+    }
+
+    return sum / DIMMER_MOVING_AVERAGE_SAMPLE;
+
+}
+/******************************************************************************/
 void vTaskDimmer( void *pvParameters)
 {
-    uint16_t brightness;
-    uint16_t potValue;
-    uint16_t lastPotValue;
+    uint16_t brightness = 0;
+    uint16_t potValue = 0;
+
+    bool useWebAdjust =  false;
+
+    uint16_t LastReceivedValue = 0;
+    uint16_t ReceivedValue = 0;
+
+    long int movingAverageValue = 0;
+    long int lastMovingAverage = 0;
 
     DimmerConfig();
 
@@ -168,15 +209,45 @@ void vTaskDimmer( void *pvParameters)
 
     for(;;)
     {
+
         potValue = analogRead(PIN_ANALOGIC_DIMMER_POT);
 
-        if(lastPotValue != potValue)
+        if(xQueueReceive(xQueueChangeDimmerValue, &ReceivedValue, 0) == pdTRUE)
         {
-            // brightness = map(potValue, DIMMER_MIN_VALUE, DIMMER_MAX_VALUE, DIMMER_MIN_DELAY_US, DIMMER_MAX_DELAY_US);
-            brightness = ((potValue - DIMMER_MIN_VALUE) * (DIMMER_MAX_DELAY_US - DIMMER_MIN_DELAY_US)) / ((DIMMER_MAX_VALUE - DIMMER_MIN_VALUE) + DIMMER_MIN_DELAY_US);
+            ReceivedValue = (uint16_t)map(ReceivedValue, 0, 100, 0, 4095);
+            useWebAdjust = true;
 
-            lastPotValue = potValue;
+            #if DIMMER_DEBUG == true 
+                Serial.printf("valor recebido: %i\n", ReceivedValue);
+            #endif /* DIMMER_DEBUG */
         }
+        else 
+        {
+            movingAverageValue = CalculaMediaMovel(potValue);
+
+            if(abs(movingAverageValue - lastMovingAverage) > 30)
+            {
+                if(useWebAdjust == false)
+                {
+                    if(lastMovingAverage != 0) 
+                    {
+                        ReceivedValue = movingAverageValue;
+                    }
+
+                    lastMovingAverage = movingAverageValue;
+                }
+
+                /* Caso esteja usando o valor web, é necessário levar a média movel para zero */
+                else if(useWebAdjust == true && movingAverageValue == 0)
+                {
+                    useWebAdjust = false;
+                }
+            }
+
+        }
+
+        brightness = ((ReceivedValue - DIMMER_MIN_VALUE) * (DIMMER_MAX_DELAY_US - DIMMER_MIN_DELAY_US)) / ((DIMMER_MAX_VALUE - DIMMER_MIN_VALUE) + DIMMER_MIN_DELAY_US);
+        LastReceivedValue = ReceivedValue;
 
 
         if(xSemaphoreTake( xDimmerSemaphore_ZCD, portMAX_DELAY ) == pdTRUE)

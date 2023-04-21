@@ -11,6 +11,8 @@
 
 #define DIMMER_MIN_VALUE                0
 #define DIMMER_MAX_VALUE                4095
+
+#define DIMMER_MOVING_AVERAGE_SAMPLE    10
 /******************************************************************************/
 void DimmerConfig( void );
 void ISR_Dimmer( void *args );
@@ -21,6 +23,7 @@ void SetTimerPinLow( void );
 void ISR_TurnPinHigh( void );
 void SetTimerPinHigh( int16_t brightness );
 
+long int CalculaMediaMovel(long int value);
 void vTaskDimmer( void *pvParameters);
 /******************************************************************************/
 #endif /* DIMMER_H */

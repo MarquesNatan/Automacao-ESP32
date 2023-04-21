@@ -4,6 +4,7 @@
 #include "../../lib/util/include/util.h"
 #include "../../lib/mqtt/include/mqtt.h"
 #include "../pirsensor/include/pirsensor.h"
+#include "../dimmer/include/dimmer.h"
 
 #include "Arduino.h"
 
@@ -14,7 +15,11 @@ xQueueHandle xQueueCommandReceived;
 xQueueHandle xQueueCommandReady;
 /******************************************************************************/
 extern xQueueHandle xQueueChangeMode;
+extern xQueueHandle xQueueChangeDimmerValue;
+/******************************************************************************/
 static command_callback_func commandCallback;
+/******************************************************************************/
+volatile uint8_t receivedAnalogicValue = 0;
 /******************************************************************************/
 void SetCommandCallback(command_callback_func ptr)
 {
@@ -37,7 +42,7 @@ bool ValidateCommand(newcommand_t command, uint8_t receiver[])
     uint8_t params  = charToInt(command.data, 4, 2);
 
     uint8_t CommandType[] = {COMMAND_TURN_ON, COMMAND_TURN_OFF, COMMAND_TOGGLE, COMMAND_ANALOGIC, COMMAND_READ_PIN, COMMAND_PIRSENSOR_ENABLE};
-    uint8_t CommandOut[] = {OUTPUT_00, OUTPUT_01, OUTPUT_02, OUTPUT_03, OUTPUT_04};
+    uint8_t CommandOut[] = {OUTPUT_00, OUTPUT_01, OUTPUT_02, OUTPUT_03, OUTPUT_04, OUTPUT_ANALOGIC};
 
     #if COMMAND_DEBUG == true
         if(sizeof(CommandType) != COMMAND_TYPES_LEGTH || sizeof(CommandOut) != OUTPUT_LENGTH)
@@ -46,9 +51,9 @@ bool ValidateCommand(newcommand_t command, uint8_t receiver[])
         }
     #endif /* COMMAND_DEBUG */
 
-    if(ValueIsPresent(action, CommandType, 0, COMMAND_TYPES_LEGTH))
+    if(ValueIsPresent(action, CommandType, 0, sizeof(CommandType)))
     {
-        if(ValueIsPresent(out, CommandOut, 0, OUTPUT_LENGTH))
+        if(ValueIsPresent(out, CommandOut, 0, sizeof(CommandOut)))
         {
             /* Atualiza o estado */
             #if COMMAND_DEBUG == true
@@ -57,6 +62,7 @@ bool ValidateCommand(newcommand_t command, uint8_t receiver[])
 
             receiver[0] = action;
             receiver[1] = out;
+            receiver[2] = params;
 
             return true;
         }
@@ -136,6 +142,7 @@ void vTaskCommandRun( void *pvParameters )
     uint8_t output = 0;
     char msgRead[] = "05006600";
     const char topic[] = "tccautomacao/leitura/";
+    uint8_t analogicValue = 0;
    
 
     for(;;)
@@ -146,28 +153,46 @@ void vTaskCommandRun( void *pvParameters )
             if(commandParams[0] != COMMAND_ANALOGIC && commandParams[0] != COMMAND_TOGGLE && commandParams[0] != COMMAND_READ_PIN && commandParams[0] != COMMAND_PIRSENSOR_ENABLE)
             {
                 digitalWrite(commandParams[1], commandParams[0]);
-                Serial.printf("TURN_ON [%i:%i]\n", commandParams[0], commandParams[1]);
+
+                #if COMMAND_DEBUG == true
+                    Serial.printf("TURN_ON [%i:%i]\n", commandParams[0], commandParams[1]);
+                #endif /* COMMAND_DEBUG */
 
             }
             else if (commandParams[0] == COMMAND_TOGGLE)
             {
                 digitalWrite(commandParams[1], !digitalRead(commandParams[1]));
-                Serial.printf("TURN_OFF [%i:%i]\n", commandParams[0], commandParams[1]);
+                #if COMMAND_DEBUG == true
+                    Serial.printf("TURN_OFF [%i:%i]\n", commandParams[0], commandParams[1]);
+                #endif /* COMMAND_DEBUG */
             }
             else if(commandParams[0] == COMMAND_ANALOGIC)
             {
                 /* Chama a função de controle do Dimmer */
-                Serial.printf("COMMAND_ANALOGIC [%i:%i]\n", commandParams[0], commandParams[1]);
+                #if COMMAND_DEBUG == true
+                    Serial.printf("COMMAND_ANALOGIC [%i:%i]\n", commandParams[0], commandParams[2]);
+                #endif /* COMMAND_DEBUG */
+                
+                if(xQueueChangeDimmerValue != NULL)
+                {
+                    receivedAnalogicValue = commandParams[2];
+                    if(xQueueSendToBack(xQueueChangeDimmerValue, (void *)&receivedAnalogicValue, 0) != pdTRUE)
+                    {
+                        #if COMMAND_DEBUG == true
+                            Serial.printf("Erro ao inserir comando analógico.\n");
+                        #endif /* COMMAND_DEBUG */   
+                    }
+                }
             }
-
-            /* caso tenha que isolar o feedback apenas para o comando de COMMAND_READ_PIN */
             else if(commandParams[0] == COMMAND_READ_PIN)
             {
-                Serial.printf("COMMAND_READ_PIN [%i:%i]\n", commandParams[0], commandParams[1]);
+                #if COMMAND_DEBUG == true
+                    Serial.printf("COMMAND_READ_PIN [%i:%i]\n", commandParams[0], commandParams[1]);
+                #endif /* COMMAND_DEBUG */   
             }
 
 
-            if(commandParams[1] != OUTPUT_ANALOGIC && commandParams[1] != COMMAND_PIRSENSOR_ENABLE)
+            if(commandParams[1] != OUTPUT_ANALOGIC)
             {
                 output = digitalRead(commandParams[1]);
 
@@ -176,14 +201,6 @@ void vTaskCommandRun( void *pvParameters )
 
                 msgRead[4] = (output & 0xF0) + '0';    
                 msgRead[5] = (output & 0x0F) + '0';
-                
-                #if COMMAND_DEBUG == true
-                    for(int i = 0; i < 8; i++)
-                    {
-                        Serial.printf("%c", msgRead[i]);
-                    }
-                    Serial.println();
-                #endif /* COMMAND_DEBUG */
             }
             
             /* Envia o estado atual da saída /  valor de ajuste analógico */

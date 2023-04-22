@@ -225,26 +225,27 @@ void vTaskDimmer( void *pvParameters)
         {
             movingAverageValue = CalculaMediaMovel(potValue);
 
-            if(abs(movingAverageValue - lastMovingAverage) > 30)
+            if(useWebAdjust == false)
             {
-                if(useWebAdjust == false)
+                /* Verifica a variação na média movel */
+                if(abs(movingAverageValue - lastMovingAverage) > 30)
                 {
-                    if(lastMovingAverage != 0) 
-                    {
-                        ReceivedValue = movingAverageValue;
-                    }
 
+                    ReceivedValue = movingAverageValue;
                     lastMovingAverage = movingAverageValue;
-                }
 
-                /* Caso esteja usando o valor web, é necessário levar a média movel para zero */
-                else if(useWebAdjust == true && movingAverageValue == 0)
+                }
+            }
+            else
+            {
+                if(movingAverageValue == 0)
                 {
                     useWebAdjust = false;
                 }
             }
-
         }
+
+        Serial.printf("mv: %li lmv: %li uwb: %i\n", movingAverageValue, lastMovingAverage, useWebAdjust);
 
         brightness = ((ReceivedValue - DIMMER_MIN_VALUE) * (DIMMER_MAX_DELAY_US - DIMMER_MIN_DELAY_US)) / ((DIMMER_MAX_VALUE - DIMMER_MIN_VALUE) + DIMMER_MIN_DELAY_US);
         LastReceivedValue = ReceivedValue;

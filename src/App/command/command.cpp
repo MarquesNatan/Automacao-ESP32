@@ -44,20 +44,13 @@ bool ValidateCommand(newcommand_t command, uint8_t receiver[])
     uint8_t CommandType[] = {COMMAND_TURN_ON, COMMAND_TURN_OFF, COMMAND_TOGGLE, COMMAND_ANALOGIC, COMMAND_READ_PIN, COMMAND_PIRSENSOR_ENABLE};
     uint8_t CommandOut[] = {OUTPUT_00, OUTPUT_01, OUTPUT_02, OUTPUT_03, OUTPUT_04, OUTPUT_ANALOGIC};
 
-    #if COMMAND_DEBUG == true
-        if(sizeof(CommandType) != COMMAND_TYPES_LEGTH || sizeof(CommandOut) != OUTPUT_LENGTH)
-        {
-           Serial.printf("Erro na quantidade de comandos/saidas.\n");
-        }
-    #endif /* COMMAND_DEBUG */
-
     if(ValueIsPresent(action, CommandType, 0, sizeof(CommandType)))
     {
         if(ValueIsPresent(out, CommandOut, 0, sizeof(CommandOut)))
         {
             /* Atualiza o estado */
             #if COMMAND_DEBUG == true
-                Serial.printf("Comando valido.\n");
+                Serial.printf("Comando valido. [%i][%i][%i]\n", action, out, params);
             #endif /* COMMAND_DEBUG */
 
             receiver[0] = action;
@@ -131,6 +124,8 @@ void vTaskCommandHandle( void *pvParameters )
                 }
             #endif /* COMMAND_DEBUG */
         }
+
+        vTaskDelay(pdMS_TO_TICKS(50));
     }
 
 }
@@ -148,7 +143,7 @@ void vTaskCommandRun( void *pvParameters )
     for(;;)
     {
         /* Pega o comando que foi validado como certo */
-        if(xQueueReceive(xQueueCommandReady, &commandParams, portMAX_DELAY) == pdTRUE)
+        if(xQueueReceive(xQueueCommandReady, &commandParams, 0) == pdTRUE)
         {
             if(commandParams[0] != COMMAND_ANALOGIC && commandParams[0] != COMMAND_TOGGLE && commandParams[0] != COMMAND_READ_PIN && commandParams[0] != COMMAND_PIRSENSOR_ENABLE)
             {
@@ -204,8 +199,11 @@ void vTaskCommandRun( void *pvParameters )
             }
             
             /* Envia o estado atual da saída /  valor de ajuste analógico */
-            (*commandCallback)(msgRead, topic);
+            // (*commandCallback)(msgRead, topic);
+            MQTT_Publish(msgRead, topic);
         }
+
+        vTaskDelay(pdMS_TO_TICKS(25));
     }
 }
 /******************************************************************************/

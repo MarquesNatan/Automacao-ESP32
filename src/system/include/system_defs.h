@@ -5,7 +5,7 @@
 #define DEBUG                           0x00
 #define RELEASE                         0x01
 /******************************************************************************/
-#define SYSTEM_BUILD_TYPE               SYSTEM_BUILD
+#define SYSTEM_BUILD_TYPE               RELEASE
 
 #define WIFI_ENABLE                     true
 #define MQTT_ENABLE                     true
@@ -29,17 +29,18 @@
     #define PIR_SENSOR_DEBUG            true
 #else
     #if defined WIFI_ENABLE && WIFI_ENABLE == true
-        #define WIFI_DEBUG                  false
+        #define WIFI_DEBUG                  true
     #endif /* WIFI_ENABLE */
 
     #if defined MQTT_ENABLE && MQTT_ENABLE == true
-        #define MQTT_DEBUG                  false
+        #define MQTT_DEBUG                  true
     #endif /* MQTT_ENABLE */ 
 
     #define COMMAND_DEBUG               false
     #define RTC_DEBUG                   false
     #define ISR_DEBUG                   false
-    #define DIMMER_DEBUG                false
+    #define DIMMER_DEBUG                false 
+    #define PIR_SENSOR_DEBUG            false
 #endif
 
 #define MQTT_MAX_QUEUE_LENGTH           5

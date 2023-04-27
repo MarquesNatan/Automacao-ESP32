@@ -245,7 +245,7 @@ void vTaskDimmer( void *pvParameters)
             }
         }
 
-        Serial.printf("mv: %li lmv: %li uwb: %i\n", movingAverageValue, lastMovingAverage, useWebAdjust);
+        // Serial.printf("mv: %li lmv: %li uwb: %i\n", movingAverageValue, lastMovingAverage, useWebAdjust);
 
         brightness = ((ReceivedValue - DIMMER_MIN_VALUE) * (DIMMER_MAX_DELAY_US - DIMMER_MIN_DELAY_US)) / ((DIMMER_MAX_VALUE - DIMMER_MIN_VALUE) + DIMMER_MIN_DELAY_US);
         LastReceivedValue = ReceivedValue;

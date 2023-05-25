@@ -19,7 +19,6 @@ typedef bool (*command_callback_func)(const char *, const char *);
 #define COMMAND_TOGGLE                  2
 #define COMMAND_ANALOGIC                3
 #define COMMAND_READ_PIN                4
-#define COMMAND_PIRSENSOR_ENABLE        5
 
 #define OUTPUT_LENGTH                   BOARD_DIGITAL_OUTPUT
 
@@ -28,7 +27,7 @@ typedef bool (*command_callback_func)(const char *, const char *);
 #define OUTPUT_02                       PIN_DIGITAL_RELAY_2
 #define OUTPUT_03                       PIN_DIGITAL_RELAY_3
 #define OUTPUT_04                       PIN_DIGITAL_RELAY_4
-#define OUTPUT_ANALOGIC                 0
+#define OUTPUT_ANALOGIC                 00
 /******************************************************************************/
 typedef struct 
 {

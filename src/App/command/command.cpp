@@ -10,12 +10,16 @@
 
 #include "freertos/queue.h"
 #include "freertos/task.h"
+#include "freertos/semphr.h"
 /******************************************************************************/
 xQueueHandle xQueueCommandReceived;
 xQueueHandle xQueueCommandReady;
 /******************************************************************************/
 extern xQueueHandle xQueueChangeMode;
+/******************************************************************************/
 extern xQueueHandle xQueueChangeDimmerValue;
+extern SemaphoreHandle_t xGetGlobalDimmerValueSemaphore;
+extern uint16_t globalDimmerValue;
 /******************************************************************************/
 static command_callback_func commandCallback;
 /******************************************************************************/
@@ -41,7 +45,7 @@ bool ValidateCommand(newcommand_t command, uint8_t receiver[])
     uint8_t out    = charToInt(command.data, 2, 2);
     uint8_t params  = charToInt(command.data, 4, 2);
 
-    uint8_t CommandType[] = {COMMAND_TURN_ON, COMMAND_TURN_OFF, COMMAND_TOGGLE, COMMAND_ANALOGIC, COMMAND_READ_PIN, COMMAND_PIRSENSOR_ENABLE};
+    uint8_t CommandType[] = {COMMAND_TURN_ON, COMMAND_TURN_OFF, COMMAND_TOGGLE, COMMAND_ANALOGIC, COMMAND_READ_PIN};
     uint8_t CommandOut[] = {OUTPUT_00, OUTPUT_01, OUTPUT_02, OUTPUT_03, OUTPUT_04, OUTPUT_ANALOGIC};
 
     if(ValueIsPresent(action, CommandType, 0, sizeof(CommandType)))
@@ -135,9 +139,10 @@ void vTaskCommandRun( void *pvParameters )
 
     uint8_t commandParams[3];
     uint8_t output = 0;
+    char valueConversion[2];
+
     char msgRead[] = "05006600";
-    const char topic[] = "tccautomacao/leitura/";
-    uint8_t analogicValue = 0;
+    const char topic[] = "tccautomacao/comando/";
    
 
     for(;;)
@@ -145,7 +150,7 @@ void vTaskCommandRun( void *pvParameters )
         /* Pega o comando que foi validado como certo */
         if(xQueueReceive(xQueueCommandReady, &commandParams, 0) == pdTRUE)
         {
-            if(commandParams[0] != COMMAND_ANALOGIC && commandParams[0] != COMMAND_TOGGLE && commandParams[0] != COMMAND_READ_PIN && commandParams[0] != COMMAND_PIRSENSOR_ENABLE)
+            if(commandParams[0] != COMMAND_ANALOGIC && commandParams[0] != COMMAND_TOGGLE && commandParams[0] != COMMAND_READ_PIN)
             {
                 digitalWrite(commandParams[1], commandParams[0]);
 
@@ -183,24 +188,36 @@ void vTaskCommandRun( void *pvParameters )
             {
                 #if COMMAND_DEBUG == true
                     Serial.printf("COMMAND_READ_PIN [%i:%i]\n", commandParams[0], commandParams[1]);
-                #endif /* COMMAND_DEBUG */   
-            }
+                #endif /* COMMAND_DEBUG */
 
-
-            if(commandParams[1] != OUTPUT_ANALOGIC)
-            {
-                output = digitalRead(commandParams[1]);
+                if(commandParams[1] != OUTPUT_ANALOGIC)
+                {
+                    output = digitalRead(commandParams[1]);
+                }
+                else 
+                {
+                    xSemaphoreTake(xGetGlobalDimmerValueSemaphore, portMAX_DELAY);
+                        output = (uint8_t)map(globalDimmerValue, 0, 4095, 0, 100);
+                    xSemaphoreGive(xGetGlobalDimmerValueSemaphore);
+                }
 
                 msgRead[2] = ((commandParams[1] & 0xF0) >> 4) + '0';
                 msgRead[3] = (commandParams[1] & 0x0F) + '0';
 
-                msgRead[4] = (output & 0xF0) + '0';    
-                msgRead[5] = (output & 0x0F) + '0';
-            }
+                decimalToHexadecimal(output, valueConversion);
+
+                msgRead[4] = valueConversion[0];
+                msgRead[5] = valueConversion[1];
+
+                Serial.printf("%i %s | %s\n", output, valueConversion, msgRead);
             
-            /* Envia o estado atual da saída /  valor de ajuste analógico */
-            // (*commandCallback)(msgRead, topic);
-            MQTT_Publish(msgRead, topic);
+                /* Envia o estado atual da saída /  valor de ajuste analógico */
+                MQTT_Publish(msgRead, MQTT_TOPIC_READ);
+                
+            }
+
+
+            // 05001=00
         }
 
         vTaskDelay(pdMS_TO_TICKS(25));

@@ -148,7 +148,10 @@ void vTaskPirSensorHandle( void * pvParameters)
                     /* Verificação do sensor de presença */
                     if(xSemaphoreTake(xSemaphorePirSensor, 0) == pdTRUE)
                     {
-                        Serial.printf("Semaforo PIR capturado com sucesso.\n");
+                        #if PIR_SENSOR_DEBUG == true
+                            Serial.printf("Semaforo PIR capturado com sucesso.\n");
+                        #endif /* PIR_SENSOR_DEBUG */
+                        
                         detachInterrupt(digitalPinToInterrupt(PIN_DIGITAL_PIR_IN));
 
                         while(digitalRead(PIN_DIGITAL_PIR_IN))
@@ -197,7 +200,7 @@ void vTaskPirSensorHandle( void * pvParameters)
                     outputValue = digitalRead(OUTPUT_ENABLED_PIR_SENSOR);
                     if(outputValue)
                     {
-                         #if PIR_SENSOR_DEBUG == true
+                        #if PIR_SENSOR_DEBUG == true
                             Serial.printf("DELIGANDO OUTPUT: Mundança no nível do LDR.\n");
                         #endif /* PIR_SENSOR_DEBUG */
 

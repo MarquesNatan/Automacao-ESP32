@@ -36,7 +36,7 @@
         #define MQTT_DEBUG                  true
     #endif /* MQTT_ENABLE */ 
 
-    #define COMMAND_DEBUG               false
+    #define COMMAND_DEBUG               true
     #define RTC_DEBUG                   false
     #define ISR_DEBUG                   false
     #define DIMMER_DEBUG                false 
@@ -46,7 +46,6 @@
 #define MQTT_MAX_QUEUE_LENGTH           5
 
 #define MQTT_PUBLIC_BROKER              "mqtt.eclipseprojects.io"
-// #define MQTT_PUBLIC_BROKER                  "broker.mqttdashboard.com"
 #define MQTT_PORT                       MQTT_PORT_DEFAULT
 
 #define MQTT_SECURITY_LEVEL             UNENCRYPTED
@@ -64,6 +63,9 @@
 #endif
 
 #define BOARD_ID                         "7db8cbb3-47f8-48a7-8c5a-d0aa81fad54b"
+
+#define MQTT_TOPIC_COMMAND          "tccautomacao/comando/"
+#define MQTT_TOPIC_READ             "tccautomacao/leitura/"
 
 
 #define BOARD_DIGITAL_OUTPUT            5

@@ -15,6 +15,7 @@
 SemaphoreHandle_t xDimmerSemaphore_ZCD;
 SemaphoreHandle_t xDimmerSemaphore_Timer;
 SemaphoreHandle_t xDimmerSemaphore_TimerLow;
+SemaphoreHandle_t xGetGlobalDimmerValueSemaphore;
 /******************************************************************************/
 xQueueHandle xQueueChangeDimmerValue;
 /******************************************************************************/
@@ -22,6 +23,7 @@ hw_timer_t *timerToPinHigh = timerBegin(1, 80, true);
 hw_timer_t *timerToPinLow = timerBegin(0, 80, true);
 /******************************************************************************/
 volatile bool isPinHighEnable = false;
+volatile uint16_t globalDimmerValue = 0;
 /******************************************************************************/
 portMUX_TYPE DimmerMux = portMUX_INITIALIZER_UNLOCKED;
 portMUX_TYPE DimmerMuxTimerPinLow = portMUX_INITIALIZER_UNLOCKED;
@@ -35,10 +37,11 @@ void DimmerConfig( void )
     xDimmerSemaphore_ZCD = xSemaphoreCreateBinary();
     xDimmerSemaphore_Timer = xSemaphoreCreateBinary();
     xDimmerSemaphore_TimerLow = xSemaphoreCreateBinary();
+    xGetGlobalDimmerValueSemaphore = xSemaphoreCreateMutex();
 
-    if(xDimmerSemaphore_ZCD == NULL || xDimmerSemaphore_Timer == NULL || xDimmerSemaphore_TimerLow == NULL)
+    if(xDimmerSemaphore_ZCD == NULL || xDimmerSemaphore_Timer == NULL || xDimmerSemaphore_TimerLow == NULL || xGetGlobalDimmerValueSemaphore == NULL)
     {
-        Serial.printf("\nErro ao criar xSemaphoreDimmer OU xDimmerSemaphore_Timer\n");
+        Serial.printf("\nErro ao criar semaforos do dimmer.\n");
 
         return;
     }
@@ -245,7 +248,10 @@ void vTaskDimmer( void *pvParameters)
             }
         }
 
-        // Serial.printf("mv: %li lmv: %li uwb: %i\n", movingAverageValue, lastMovingAverage, useWebAdjust);
+        // Atualiza o valor da variável globalDimmerValue
+        xSemaphoreTake(xGetGlobalDimmerValueSemaphore, 0);
+            globalDimmerValue = ReceivedValue;
+        xSemaphoreGive(xGetGlobalDimmerValueSemaphore);
 
         brightness = ((ReceivedValue - DIMMER_MIN_VALUE) * (DIMMER_MAX_DELAY_US - DIMMER_MIN_DELAY_US)) / ((DIMMER_MAX_VALUE - DIMMER_MIN_VALUE) + DIMMER_MIN_DELAY_US);
         LastReceivedValue = ReceivedValue;

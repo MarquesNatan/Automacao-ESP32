@@ -70,10 +70,10 @@ void MQTT_tryConnect(void)
             #endif /* MQTT_DEBUG */
 
             #if MQTT_DEBUG  == true
-                Serial.printf("Subscribe: tccautomacao/digital/\n");
+                Serial.printf("Subscribe: " MQTT_TOPIC_COMMAND);
             #endif  /* MQTT_DEBUG */
 
-            MQTT.subscribe("tccautomacao/digital/");
+            MQTT.subscribe(MQTT_TOPIC_COMMAND);
         }
         else
         {
@@ -101,13 +101,21 @@ void MQTT_DataReceiver(char *topic, uint8_t *data, unsigned int length)
     uint8_t i = 0;
 
     /* Tópico recebido é para execução de comandos */
-    if(strcasestr(topic, "digital") || strcasestr(topic, "analogico"))
+    if(strcasestr(topic, "comando") || strcasestr(topic, "analogico"))
     {
 
         for(int i = 0; i < 6; i++)
         {
             command.data[i] = data[i];
+
+            #if MQTT_DEBUG  == true
+                Serial.printf("%c", command.data[i]);
+            #endif /* MQTT_DEBUG */
         }
+
+        #if MQTT_DEBUG  == true
+            Serial.printf("\n");
+        #endif /* MQTT_DEBUG */
 
         xQueueSendToBack(xQueueCommandReceived, &command, portMAX_DELAY);
     }

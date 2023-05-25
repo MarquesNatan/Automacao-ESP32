@@ -14,7 +14,7 @@
     /* Switch input */
     #define PIN_DIGITAL_SWITCH_0        GPIO_NUM_32
     #define PIN_DIGITAL_SWITCH_1        GPIO_NUM_33
-    #define PIN_DIGITAL_SWITCH_MODE      GPIO_NUM_36
+    #define PIN_DIGITAL_SWITCH_MODE     GPIO_NUM_36
 
     #define PIN_DIGITAL_LED_HEARTBEAT   GPIO_NUM_2
     #define PIN_DIGITAL_LED_ERRO        GPIO_NUM_27

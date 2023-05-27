@@ -17,8 +17,8 @@ uint8_t charToInt(uint8_t buffer[], uint8_t offset, uint8_t length)
     return value;
 }
 /******************************************************************************/
-void decimalToHexadecimal(int decimal, char *hexadecimal)
-{
+void decimalToHexadecimal(int decimal, char *hexadecimal) {
+    
     if (decimal == 0) {
         hexadecimal[0] = '0';
         hexadecimal[1] = '0';
@@ -36,20 +36,26 @@ void decimalToHexadecimal(int decimal, char *hexadecimal)
         i++;
     }
 
-    int j;
-    int k = i - 1;
-    char temp;
+    if (i == 1) {
+        hexadecimal[1] = hexadecimal[0];
+        hexadecimal[0] = '0';
+        hexadecimal[2] = '\0';
+    } else {
+        int j;
+        int k = i - 1;
+        char temp;
 
-    for (j = 0; j < i / 2; j++) {
-        temp = hexadecimal[j];
-        hexadecimal[j] = hexadecimal[k];
-        hexadecimal[k] = temp;
-        k--;
+        for (j = 0; j < i / 2; j++) {
+            temp = hexadecimal[j];
+            hexadecimal[j] = hexadecimal[k];
+            hexadecimal[k] = temp;
+            k--;
+        }
+
+        hexadecimal[i] = '\0';
     }
-
-    hexadecimal[i] = '\0';
 }
-/******************************************************************************/
+
 bool ValueIsPresent(uint8_t value, uint8_t listValues[], uint8_t startPosition, uint8_t length)
 {
     for (int i = 0; i < length; i++)

@@ -209,7 +209,7 @@ void vTaskCommandRun( void *pvParameters )
                 msgRead[4] = valueConversion[0];
                 msgRead[5] = valueConversion[1];
 
-                Serial.printf("%i %s | %s\n", output, valueConversion, msgRead);
+                // Serial.printf("char: %s | msg: %s\n", valueConversion, msgRead);
             
                 /* Envia o estado atual da saída /  valor de ajuste analógico */
                 MQTT_Publish(msgRead, MQTT_TOPIC_READ);

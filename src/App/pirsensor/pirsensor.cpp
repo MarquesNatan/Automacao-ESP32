@@ -99,6 +99,7 @@ void vTaskPirSensorHandle( void * pvParameters)
 {
     bool ldrIsEnabled = false;
     bool LDRCurrState = false;
+    bool LastStateLDR = false;
 
     uint8_t outputValue = 0;
 
@@ -132,7 +133,8 @@ void vTaskPirSensorHandle( void * pvParameters)
 
     for(;;)
     {
-        ldrIsEnabled = (bool)digitalRead(PIN_DIGITAL_LDR_IN);
+        LastStateLDR = ldrIsEnabled;
+        ldrIsEnabled = !(bool)digitalRead(PIN_DIGITAL_LDR_IN);
 
         if(ldrIsEnabled)
         {
@@ -140,9 +142,8 @@ void vTaskPirSensorHandle( void * pvParameters)
 
             if(xSemaphoreTake(xSemaphoreLDRsensor, portMAX_DELAY) == pdTRUE)
             {
-                LDRCurrState = (bool)digitalRead(PIN_DIGITAL_LDR_IN);
+                LDRCurrState = !(bool)digitalRead(PIN_DIGITAL_LDR_IN);
 
-                
                 if(LDRCurrState == ldrIsEnabled)
                 {
                     /* Verificação do sensor de presença */
@@ -194,9 +195,9 @@ void vTaskPirSensorHandle( void * pvParameters)
                     }
                     
                 }
-                else if(!LDRCurrState)
+                else
                 {
-
+                    
                     outputValue = digitalRead(OUTPUT_ENABLED_PIR_SENSOR);
                     if(outputValue)
                     {
@@ -208,10 +209,23 @@ void vTaskPirSensorHandle( void * pvParameters)
 
                         /* Inicia o timeout */
                     }
-
                 }
             }
 
+        }
+        else 
+        {
+            if(LastStateLDR)
+            {
+                #if PIR_SENSOR_DEBUG == true
+                    Serial.printf("DELIGANDO OUTPUT: Mundança no nível do LDR.\n");
+                #endif /* PIR_SENSOR_DEBUG */
+                outputValue = digitalRead(OUTPUT_ENABLED_PIR_SENSOR);
+                digitalWrite(OUTPUT_ENABLED_PIR_SENSOR, LOW);
+            }
+
+            /* Inicia o timeout */
+            SetTimerTimeout();
         }
 
         vTaskDelay(pdMS_TO_TICKS(1000));

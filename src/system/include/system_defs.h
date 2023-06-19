@@ -36,7 +36,7 @@
         #define MQTT_DEBUG                  true
     #endif /* MQTT_ENABLE */ 
 
-    #define COMMAND_DEBUG               true
+    #define COMMAND_DEBUG               false
     #define RTC_DEBUG                   false
     #define ISR_DEBUG                   false
     #define DIMMER_DEBUG                false 
